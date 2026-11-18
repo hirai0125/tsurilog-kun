@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b4f6c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="釣りログ君">
+<title>釣りログ君</title>
+<style>
+:root{--bg:#f2f6f8;--card:#fff;--ink:#17323f;--sub:#5f7682;--main:#0b4f6c;--acc:#f28c28;--line:#d7e2e8;--ok:#1f8a5b;--ng:#c0392b;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--ink);font-size:16px;padding-bottom:84px}
+header{background:var(--main);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.05em}
+.hbtn{border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer}
+header small{opacity:.8;font-size:12px}
+main{max-width:720px;margin:0 auto;padding:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:6}
+nav button{flex:1;border:0;background:none;padding:10px 0 12px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button b{font-size:20px;line-height:1}
+nav button.on{color:var(--main);font-weight:700}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--main);border-left:4px solid var(--acc);padding-left:8px}
+label{display:block;font-size:12px;color:var(--sub);margin:8px 0 3px}
+input,select,textarea{width:100%;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-family:inherit}
+textarea{min-height:70px}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-size:15px;font-weight:700;background:var(--main);color:#fff;cursor:pointer}
+.btn.sub{background:#e4edf2;color:var(--main)}
+.btn.acc{background:var(--acc)}
+.btn.ng{background:#fbe9e7;color:var(--ng)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 12px;font-size:14px;cursor:pointer;user-select:none}
+.chip.on{background:var(--main);border-color:var(--main);color:#fff}
+.chip .x{margin-left:6px;opacity:.6}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:space-between;background:#fbfdfe}
+.tile.has{background:#fff4e8;border-color:#f6c38f}
+.tile .nm{font-weight:700;font-size:15px}
+.tile .ct{font-size:22px;font-weight:800;color:var(--acc);min-width:30px;text-align:center}
+.pm{width:38px;height:38px;border-radius:50%;border:0;font-size:22px;font-weight:700;background:#e4edf2;color:var(--main)}
+.pm.plus{background:var(--main);color:#fff}
+.trip{cursor:pointer}
+.trip .top{display:flex;justify-content:space-between;align-items:baseline}
+.trip .dt{font-weight:800;font-size:16px}
+.trip .pl{color:var(--sub);font-size:13px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.tag{font-size:12px;background:#e8f1f5;color:var(--main);border-radius:6px;padding:2px 7px}
+.tag.o{background:#fff1e3;color:#a95c0d}
+.big{font-size:26px;font-weight:800;color:var(--acc)}
+.muted{color:var(--sub);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:12px;color:var(--sub);font-weight:600}
+td.n,th.n{text-align:right}
+.bar{height:10px;background:var(--acc);border-radius:5px;min-width:2px}
+.det{border:1px dashed var(--line);border-radius:8px;padding:8px;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#17323f;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:20;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:.95}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.modal .box{background:#fff;border-radius:14px 14px 0 0;width:100%;max-width:720px;padding:16px;max-height:90vh;overflow:auto}
+.sticky-save{position:sticky;bottom:72px;display:flex;gap:8px;margin-top:8px}
+.sticky-save .btn{flex:1;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.empty{text-align:center;color:var(--sub);padding:30px 10px}
+.warn{background:#fff6e0;border:1px solid #f1d38a;border-radius:8px;padding:8px;font-size:13px;margin-bottom:10px}
+.ptable{font-size:13px}
+.ptable th,.ptable td{border:1px solid #9fb3bd;padding:4px 5px;vertical-align:top}
+.ptable th{background:#e8f1f5;color:#17323f;text-align:center;white-space:nowrap}
+.ptable td.nw{white-space:nowrap}
+.ptable .sm{font-size:.85em;color:#5f7682}
+.pwrap{overflow-x:auto}.pinner{width:1040px}.ptable{min-width:680px}
+.pblock{width:100%}
+@media screen{.pblock[data-trip]{cursor:pointer}.pblock[data-trip]:active{outline:2px solid var(--acc)}}.pblock th,.pblock td{white-space:nowrap;overflow:hidden}
+.ptl{white-space:nowrap;overflow:hidden}
+.pblock{margin-bottom:14px;table-layout:fixed}
+.pblock .c0{width:110px}.pblock .c1{width:110px}.pblock .cf{width:44px;text-align:center}.pblock .ca{width:58px;text-align:center}.pblock .cm{width:110px}
+.pblock td{height:24px}
+.pblock tr.ph th{background:#dde9ef}
+.pblock tr.pp th .pinfo.ptd{margin-left:36px}
+.pblock tr.pp th .pinfo{font-weight:400;margin-left:14px;font-size:.86em}
+.pblock tr.pp th{background:#fff;text-align:left;font-size:14px;border-bottom:0;padding:4px 6px}
+.pblock tr.me td{background:#ffe6c7;border-top:2px solid #f0a050;border-bottom:2px solid #f0a050}
+.pblock tr.me td.c0{font-weight:800;border-left:5px solid #e8590c}
+.pblock tr.me td.cf b{font-size:17px}
+.mybadge{display:inline-flex;align-items:center;gap:5px;margin-left:12px;background:#fff0dd;border:2px solid #e8590c;border-radius:16px;padding:1px 10px 1px 2px;font-size:13px;color:#7a3300;vertical-align:middle}
+.mybadge b{font-size:17px;color:#d0021b}.mybadge .face{display:inline-block}
+.pblock tr.me td.cf,.pblock tr.me td.ca{color:#d0021b;font-weight:700}
+tr.ysep td{border-top:2.5px solid #6f8794}
+.my,.my b{color:#d0021b!important;font-weight:700}
+@media print{.my,.my b{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.pblock tr.pf td{background:#f3f6f8;font-size:12px}
+.ptide{font-size:12px;color:#17323f;margin:-12px 0 14px;padding:3px 6px;border:1px solid #9fb3bd;border-top:0}
+.pyr{border-left:6px solid var(--yc);padding-left:8px;margin-bottom:18px}
+.pyear{background:var(--yc);color:#fff;font-weight:800;font-size:15px;padding:5px 10px;margin:0 0 8px -8px;border-radius:0 6px 6px 0}
+.pyear span{font-weight:400;font-size:13px;margin-left:16px}
+.pyr .pblock tr.ph th{background:color-mix(in srgb, var(--yc) 14%, white)}
+.ptitle{font-size:18px;font-weight:800;margin:0 0 4px}
+.rcard{border:3px solid var(--main);padding:0;overflow:hidden}
+.rcard>.pwrap,.rcard>.empty,.rcard>.muted:not(.pcond){margin-left:12px;margin-right:12px}
+.rcard>.pwrap{padding-top:12px}.rcard>.muted:last-child{margin-bottom:12px}
+.rhead{background:var(--main);color:#fff;padding:12px 14px 14px}
+.rhead .rt{font-size:22px;font-weight:800;letter-spacing:.05em}
+.rhead .rc{font-size:12px;opacity:.85;margin-top:2px}
+.rstat{display:flex;gap:8px;margin-top:10px}
+.rstat>div{flex:1;background:rgba(255,255,255,.14);border-radius:10px;padding:6px 4px;text-align:center}
+.rstat b{display:block;font-size:24px;line-height:1.1;color:#ffd27a}
+.rstat span{font-size:11px;opacity:.9}
+@media screen{.rcard .ptitle,.rcard .pcond{display:none}}
+@media print{.rcard{border:0}.rcard>.pwrap,.rcard>.muted{margin:0}}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  body{background:#fff;padding:0;font-size:11pt}
+  header,nav,.no-print,.toast{display:none!important}
+  main{max-width:none;padding:0}
+  .card{box-shadow:none;padding:0;border-radius:0}
+  .ptable{min-width:0}
+  .pwrap{overflow:visible}
+  .ptable tr{page-break-inside:avoid}
+  .pblock{page-break-inside:avoid;break-inside:avoid}
+  .pyear{break-after:avoid;page-break-after:avoid}
+  .pyr,.pyear,.pyr .pblock tr.ph th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pblock tr.me td,.pblock tr.ph th,.pblock tr.pf td,.mybadge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pblock tr.me td.cf,.pblock tr.me td.ca,.pblock tr.me td.cf b,.pblock tr.me td.ca b{color:#d0021b!important}
+  .ptable thead{display:table-header-group}
+}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.photos .ph{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#e4edf2}
+.photos .ph img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+.photos .ph button{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px}
+.thumbs{display:flex;gap:4px;margin-top:6px}.thumbs img{width:56px;height:56px;object-fit:cover;border-radius:6px;background:#e4edf2}
+.pphotos{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid #9fb3bd;border-top:0;margin:-14px 0 14px}
+.pphotos img{height:150px;max-width:220px;object-fit:contain;border-radius:4px}
+@media print{.ptide{page-break-inside:avoid;break-inside:avoid}.pphotos{page-break-inside:avoid;break-inside:avoid}}
+.face{display:block}
+.modal .bounce .face{margin:0 auto}
+.cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cpick{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;line-height:1.3;color:var(--ink);cursor:pointer;font-family:inherit}
+.cpick.on{border-color:var(--acc);background:#fff4e8;box-shadow:0 0 0 2px #f6c38f}
+.cpick small{color:var(--sub)}
+.cprev{display:flex;justify-content:space-between;gap:4px;text-align:center}.cprev small{font-size:11px;color:var(--sub);line-height:1.3;display:block}.cprev .face{margin:0 auto}
+.mood{display:flex;align-items:center;gap:14px;background:#f6fafc;border-radius:12px;padding:10px;margin-bottom:12px}
+.mood .n{font-size:34px;font-weight:800;color:var(--acc);line-height:1}.mood .n small{font-size:15px}
+.mood .m{font-size:16px;font-weight:800;margin-top:4px}
+.bounce{animation:bn .5s ease}@keyframes bn{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.bounce{animation:none}}
+.stepnav{position:sticky;top:50px;z-index:4;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:6px 0 8px;margin:-4px 0 6px;scrollbar-width:none}
+.stepnav::-webkit-scrollbar{display:none}
+.stepnav a{flex:none;text-decoration:none;font-size:13px;font-weight:700;color:var(--main);background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px 11px}
+.stepnav a.done{background:#e6f4ec;border-color:#9fd3b4;color:#1d6b3f}
+.card h2.st{display:flex;align-items:center;gap:8px;border:0;padding:0;font-size:17px}
+.st .no{flex:none;width:28px;height:28px;border-radius:50%;background:var(--main);color:#fff;display:grid;place-items:center;font-size:15px}
+.st .tg{font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;background:#e4edf2;color:var(--sub)}
+.st .tg.req{background:#fde6dc;color:#c0392b}
+.hint{font-size:13px;color:var(--sub);background:#f3f8fa;border-radius:8px;padding:7px 10px;margin:-2px 0 10px}
+.card[id^=st]{scroll-margin-top:104px}
+details.seatbox{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+details.seatbox summary{font-weight:700;font-size:14px;color:var(--main);cursor:pointer}
+.who{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.who .chip{font-size:15px;padding:8px 14px}
+.sticky-save .mini{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:#fff;border-radius:10px;padding:4px 10px 4px 4px;box-shadow:0 2px 8px rgba(0,0,0,.15);font-weight:800;color:var(--acc)}
+.trip .face{display:inline-block;vertical-align:middle;flex:none}
+.mybox{display:flex;align-items:center;gap:10px;background:#fff0dd;border:2px solid #f0a050;border-left:6px solid #e8590c;border-radius:10px;padding:6px 10px;margin:8px 0 6px}
+.mybox .mn{font-weight:800;font-size:15px;color:#7a3300}.mybox .mn b{font-size:24px;color:#d0021b;margin:0 2px}
+</style>
+</head>
+<body>
+<header><h1>🎣 釣りログ君</h1><div style="display:flex;align-items:center;gap:10px"><small id="hdrSub"></small><button id="hdrPrint" class="hbtn">🖨 印刷</button></div></header>
+<main id="app"></main>
+<nav>
+  <button data-nav="print" class="on"><b>🎣</b>釣果記録</button>
+  <button data-nav="list"><b>📋</b>記録一覧</button>
+  <button data-nav="stats"><b>📊</b>集計</button>
+  <button data-nav="settings"><b>⚙️</b>設定</button>
+</nav>
+<div class="toast" id="toast"></div>
+<input type="file" id="dataFile" accept=".json,application/json,text/plain" style="display:none">
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>
+const KEY = 'tsuribori-note-share-v1';
+const DEF_FISH = ['ブリ','メジロ','ハマチ','ブリヒラ','ヒラマサ','カンパチ','シオ','マダイ','シマアジ','イサキ','マハタ','クロソイ','サーモン','タマクエ'];
+const DEF_BAIT = ['生きアジ','ウグイ','シラサエビ','キビナゴ','イワシ','サバ切り身','ササミ','AKB','イカ','ハイブリッドクロス','ダンゴ'];
+const OLD_BAIT = ['活きアジ','イワシ','キビナゴ','ササミ','エビ','ダンゴ','イカ','サバ切り身','練りエサ'];
+const DEF_PLACE = ['釣堀紀州','雑賀崎シーパーク','釣堀田尻','釣堀オーパ','辨屋','水宝','レインボー'];
+const STATIONS = [['','（なし）'],
+  ['SR','白浜（和歌山県）'],['GB','御坊（和歌山県）'],['YR','由良推定（御坊と下津の平均）'],['H1','下津（和歌山県）'],['Z9','海南（和歌山県）'],['WY','和歌山（和歌山市）'],
+  ['TB','鳥羽（三重県）'],['K1','姫路・飾磨（兵庫県）'],['XM','敦賀（福井県）'],
+  ['TN','淡輪（大阪府）'],['KK','関空島（大阪府）'],['J2','岸和田（大阪府）'],['IO','泉大津（大阪府）'],['SI','堺（大阪府）'],['OS','大阪（大阪府）']];
+const stnName = c => (STATIONS.find(x=>x[0]===c)||[c,c])[1].replace(/（.*）/,'');
+const DEF_TIDE_STN = {'辨屋':'TB','水宝':'K1','レインボー':'XM','釣堀紀州':'YR','雑賀崎シーパーク':'WY','釣堀オーパ':'OS','釣堀田尻':'OS'};
+const DEF_PEOPLE = [];
+const TIDES = ['大潮','中潮','小潮','長潮','若潮'];
+const FLOW_SPEED = ['','止まっている','緩い','普通','やや速い','速い','激流'];
+const FLOW_DIR = ['','北','北東','東','南東','南','南西','西','北西','回っている／変わる'];
+const WEATHER = ['','晴れ','晴れ時々曇り','曇り','曇りのち雨','小雨','雨'];
+const WIND_DIR = ['','北','北東','東','南東','南','南西','西','北西','無風'];
+const WIND_POW = ['','無風','弱い','やや弱い','普通','やや強い','強い','強風'];
+function windParts(t){ // 旧データ（文字入力）からも風向・強さを読み取る
+  if(t.windDir!=null || t.windPow!=null) return [t.windDir||'', t.windPow||''];
+  const w=String(t.wind||'').trim().split(/[\s　・]+/);
+  const d=WIND_DIR.includes(w[0])?w[0]:'', p=WIND_POW.includes(w[w.length-1])&&w[w.length-1]!==d?w[w.length-1]:'';
+  return [d,p];
+}
+
+let storageOK = true;
+let db = load();
+let view = 'print'; // 最初に開く画面：海上釣堀 釣果記録
+let draft = null;          // 編集中の釣行
+let curPerson = null;      // 釣果入力中の人
+let lastLv = null;         // 直前の表情（変わった時だけ弾ませる）
+let delArm = false;
+let filt = {year:'all', place:'all'};
+
+/* ---------- 保存 ---------- */
+function normalize(d){
+  d = d || {};
+  d.trips = Array.isArray(d.trips) ? d.trips : [];
+  d.fish = Array.isArray(d.fish) && d.fish.length ? d.fish : DEF_FISH.slice();
+  d.places = Array.isArray(d.places) ? d.places : DEF_PLACE.slice();
+  d.people = Array.isArray(d.people) ? d.people : DEF_PEOPLE.slice();
+  d.baits = Array.isArray(d.baits) ? d.baits : DEF_BAIT.slice();
+  d.tideStn = (d.tideStn && typeof d.tideStn==='object') ? d.tideStn : {...DEF_TIDE_STN};
+  d.trips.forEach(t=>{ if(!Array.isArray(t.baits)) t.baits=[]; t.seats=t.seats||{}; t.pnotes=t.pnotes||{}; if(!Array.isArray(t.photos)) t.photos=[];
+    if(t.ikada && !t.seats[d.me]) t.seats[d.me]=t.ikada;
+    if(!t.rafts){ t.rafts={}; // 旧データ「紀州A-東南」→ イカダ名「紀州A」＋番号・方位「東南」
+      for(const p in t.seats){ const v=String(t.seats[p]||''); let m=v.match(/^(.+?)-(.+)$/) || v.match(/^(\D+?)(\d.*)$/);
+        if(m){ t.rafts[p]=m[1]; t.seats[p]=m[2]; } } } });
+  d.me = d.me || '自分';
+  if(!(d.addV>=2)){ d.trips.forEach(t=>{ // 天気の「強風」→ 風の強さへ
+      if(t.weather==='強風'){ t.weather=''; const [wd,wp]=windParts(t); t.windDir=wd; t.windPow=wp||'強風'; t.wind=[t.windDir,t.windPow].filter(Boolean).join(' '); }
+      if(t.windPow==='非常に強い'){ t.windPow='強風'; t.wind=[t.windDir,t.windPow].filter(Boolean).join(' '); } }); }
+  if(!(d.addV>=1)){ for(const p of ['辨屋','水宝']){ if(!d.places.includes(p)) d.places.push(p); if(!d.tideStn[p]) d.tideStn[p]=DEF_TIDE_STN[p]; } d.addV=1; }
+  if(!(d.addV>=3)){ if(!d.places.includes('レインボー')) d.places.push('レインボー'); if(!d.tideStn['レインボー']) d.tideStn['レインボー']='XM'; d.addV=3; }
+  return d;
+}
+function load(){
+  try{ const s = localStorage.getItem(KEY); if(s) return normalize(JSON.parse(s)); }
+  catch(e){ storageOK = false; }
+  return normalize({});
+}
+const listsSig = d => JSON.stringify([d.fish,d.baits,d.places,d.people,d.me,d.tideStn]);
+let lastListsSig = null;
+function save(){
+  setMeta({changedAt:Date.now()});
+  const sig = listsSig(db); if(lastListsSig!==null && sig!==lastListsSig) db.listsAt = Date.now(); lastListsSig = sig;
+  try{ localStorage.setItem(KEY, JSON.stringify(db)); storageOK = true; }
+  catch(e){ storageOK = false; toast('この画面では保存できません。設定→バックアップで書き出してください'); }
+}
+
+/* ---------- 写真（端末内の IndexedDB に保存） ---------- */
+const photoCache = {};
+let idbP = null;
+function idb(){
+  if(!idbP) idbP = new Promise((res,rej)=>{
+    try{ const r=indexedDB.open('tsuribori-note-share-photos',1);
+      r.onupgradeneeded=()=>r.result.createObjectStore('p');
+      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+    }catch(e){ rej(e); }
+  });
+  return idbP;
+}
+async function photoPut(id,data){ photoCache[id]=data; const d=await idb(); return new Promise((res,rej)=>{ const tx=d.transaction('p','readwrite'); tx.objectStore('p').put(data,id); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); }
+async function photoGetLocal(id){ if(photoCache[id]) return photoCache[id]; try{ const d=await idb(); return await new Promise(res=>{ const r=d.transaction('p').objectStore('p').get(id); r.onsuccess=()=>{ if(r.result) photoCache[id]=r.result; res(r.result||null); }; r.onerror=()=>res(null); }); }catch(e){ return photoCache[id]||null; } }
+async function photoGet(id){
+  return await photoGetLocal(id);
+}
+async function photoDel(id){ delete photoCache[id]; try{ const d=await idb(); d.transaction('p','readwrite').objectStore('p').delete(id); }catch(e){} }
+function fillPhotos(root){ (root||document).querySelectorAll('img[data-pid]').forEach(async img=>{ if(img.src) return; const v=await photoGet(img.dataset.pid); if(v) img.src=v; else img.alt='（写真なし）'; }); }
+function shrinkImage(file, max=1400, q=0.78){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{ let w=im.naturalWidth,h=im.naturalHeight; const k=Math.min(1,max/Math.max(w,h)); w=Math.round(w*k); h=Math.round(h*k);
+      const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',q)); };
+    im.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('img')); };
+    im.src=url;
+  });
+}
+function showPhoto(id){
+  openModal(`<img data-pid="${id}" style="width:100%;border-radius:8px;display:block">
+    <button class="btn sub wide" style="margin-top:10px" id="phClose">閉じる</button>`);
+  fillPhotos($('#modalBox')); $('#phClose').onclick=closeModal;
+}
+
+/* ---------- 読み込み時の統合 ---------- */
+function mergeDb(L, R){
+  if(!R || !Array.isArray(R.trips)) return L;
+  const del = {...(R.deleted||{})};
+  for(const k in (L.deleted||{})) del[k] = Math.max(del[k]||0, L.deleted[k]);
+  const map = {};
+  for(const t of [...R.trips, ...L.trips]){ const o=map[t.id]; if(!o || (t.updatedAt||0) > (o.updatedAt||0)) map[t.id]=t; }
+  const trips = Object.values(map).filter(t => !(del[t.id] && del[t.id] >= (t.updatedAt||0)));
+  const lw = (L.listsAt||0) >= (R.listsAt||0) ? L : R;
+  const out = JSON.parse(JSON.stringify({...lw, trips:[], deleted:{}}));
+  out.trips = JSON.parse(JSON.stringify(trips)); out.deleted = del;
+  delete out.photoData;
+  return normalize(out);
+}
+/* ---------- キャラクター（自分の釣果で表情が変わる） ---------- */
+const CHARAS = [
+ {id:'asia-m',s:'m',skin:'#f2d0b0',hair:'#1e1a18',hs:'short',shirt:'#0b4f6c'},
+ {id:'la-m',s:'m',skin:'#c08757',hair:'#1f1610',hs:'short',shirt:'#b23a48',mus:1,cap:'#f2c230'},
+ {id:'eu-m',s:'m',skin:'#f3d5c3',hair:'#7a4a26',hs:'side',shirt:'#264b96'},
+ {id:'asia-f',s:'f',skin:'#f4d4b6',hair:'#1e1a18',hs:'bob',shirt:'#e07b39'},
+ {id:'af-f',s:'f',skin:'#603b27',hair:'#140e0b',hs:'afro',shirt:'#e8590c'},
+ {id:'eu-f',s:'f',skin:'#f7e0d2',hair:'#e6cc8f',hs:'braids',shirt:'#1e6fb8'},
+ {id:'cat',a:'cat',skin:'#f4b26b',body:'#e8954a'},
+ {id:'dog',a:'dog',skin:'#d9a066',body:'#3f7cc2'},
+ {id:'bear',a:'bear',skin:'#a8754f',body:'#2f8f5b'},
+ {id:'penguin',a:'penguin',skin:'#ffffff',body:'#2f3e50'},
+ {id:'otter',a:'otter',skin:'#a7784f',body:'#d9534f'},
+ {id:'rabbit',a:'rabbit',skin:'#f6f2ee',body:'#e7a3b8'},
+];
+const OLD_CHARA = {'jp-m':'asia-m','cn-m':'asia-m','ph-m':'asia-m','jp-f':'asia-f','kr-f':'asia-f','vn-f':'asia-f','in-m':'la-m','in-f':'asia-f',
+  'ke-m':'la-m','ke-f':'af-f','ng-f':'af-f','us-f':'af-f','br-m':'la-m','mx-m':'la-m','br-f':'af-f','fr-m':'eu-m','us-m':'eu-m','au-m':'eu-m','fr-f':'eu-f','se-f':'eu-f',
+  'me-m':'la-m','me-f':'asia-f','af-m':'la-m','la-f':'af-f'};
+function animalParts(c){
+  const S=c.skin, dk='#2a1d16';
+  const whisk = col=>`<path d="M38 77 L18 73 M38 81 L18 83 M82 77 L102 73 M82 81 L102 83" stroke="${col}" stroke-width="1.6" stroke-linecap="round"/>`;
+  const body = `<path d="M16 122 Q20 98 60 95 Q100 98 104 122Z" fill="${c.body}"/>`;
+  switch(c.a){
+    case 'cat': return {under: body+`<path d="M28 50 L32 12 L58 36Z" fill="${S}"/><path d="M92 50 L88 12 L62 36Z" fill="${S}"/>
+        <path d="M33 40 L35 21 L49 34Z" fill="#f7a3a3"/><path d="M87 40 L85 21 L71 34Z" fill="#f7a3a3"/>
+        <ellipse cx="60" cy="64" rx="34" ry="30" fill="${S}"/>
+        <path d="M52 36 L54 46 M60 34 L60 45 M68 36 L66 46" stroke="#d98a3e" stroke-width="3" stroke-linecap="round"/>`,
+      over: `<path d="M56.5 73 L63.5 73 L60 77Z" fill="#e66a7a"/>`+whisk('#8a6448')};
+    case 'dog': return {under: body+`<ellipse cx="60" cy="62" rx="31" ry="31" fill="${S}"/>
+        <ellipse cx="29" cy="60" rx="10" ry="21" fill="#8a5a35" transform="rotate(18 29 60)"/><ellipse cx="91" cy="60" rx="10" ry="21" fill="#8a5a35" transform="rotate(-18 91 60)"/>
+        <ellipse cx="60" cy="82" rx="16" ry="12" fill="#f3dcc0"/>`,
+      over: `<ellipse cx="60" cy="75" rx="5.5" ry="3.8" fill="${dk}"/>`};
+    case 'bear': return {under: body+`<circle cx="34" cy="36" r="11" fill="${S}"/><circle cx="86" cy="36" r="11" fill="${S}"/>
+        <circle cx="34" cy="36" r="6" fill="#d8ae86"/><circle cx="86" cy="36" r="6" fill="#d8ae86"/>
+        <ellipse cx="60" cy="64" rx="32" ry="30" fill="${S}"/><ellipse cx="60" cy="82" rx="15" ry="11" fill="#e2c39e"/>`,
+      over: `<ellipse cx="60" cy="75" rx="5.5" ry="3.8" fill="${dk}"/>`};
+    case 'penguin': return {under: `<path d="M16 122 Q20 98 60 95 Q100 98 104 122Z" fill="#2f3e50"/><ellipse cx="60" cy="118" rx="22" ry="16" fill="#fff"/>
+        <circle cx="60" cy="62" r="36" fill="#2f3e50"/>
+        <ellipse cx="47" cy="68" rx="15" ry="20" fill="#fff"/><ellipse cx="73" cy="68" rx="15" ry="20" fill="#fff"/><ellipse cx="60" cy="84" rx="21" ry="12" fill="#fff"/>`,
+      over: `<path d="M54 72 L66 72 L60 78Z" fill="#f2a33a"/>`};
+    case 'otter': return {under: body+`<circle cx="31" cy="46" r="7" fill="${S}"/><circle cx="89" cy="46" r="7" fill="${S}"/>
+        <ellipse cx="60" cy="64" rx="32" ry="29" fill="${S}"/><ellipse cx="60" cy="81" rx="19" ry="13" fill="#efdcc2"/>`,
+      over: `<ellipse cx="60" cy="73.5" rx="5" ry="3.3" fill="${dk}"/>`+whisk('#6b4a30')};
+    case 'rabbit': return {under: body+`<ellipse cx="46" cy="22" rx="8" ry="24" fill="${S}" transform="rotate(-8 46 22)"/><ellipse cx="74" cy="22" rx="8" ry="24" fill="${S}" transform="rotate(8 74 22)"/>
+        <ellipse cx="46" cy="24" rx="4" ry="17" fill="#f5b5c4" transform="rotate(-8 46 24)"/><ellipse cx="74" cy="24" rx="4" ry="17" fill="#f5b5c4" transform="rotate(8 74 24)"/>
+        <ellipse cx="60" cy="66" rx="31" ry="29" fill="${S}" stroke="#e6ddd6" stroke-width="1"/>`,
+      over: `<ellipse cx="60" cy="75" rx="3.5" ry="2.6" fill="#e66a7a"/>`};
+  }
+  return {under:'',over:''};
+}
+const MOODS = [
+  {bg:'#cfe3f5', t:'大泣き', msg:'ボウズ…（泣）次こそリベンジ！'},
+  {bg:'#e1ebf1', t:'泣き顔', msg:'うぅ…渋い一日'},
+  {bg:'#eef2f4', t:'普通',   msg:'まずまずの釣果'},
+  {bg:'#ffeccb', t:'ニッコリ', msg:'いい釣りでした！'},
+  {bg:'#ffd65c', t:'大笑い', msg:'爆釣！！最高！'},
+];
+const moodLv = n => n<=0 ? 0 : n<=3 ? 1 : n<=6 ? 2 : n<=9 ? 3 : 4;
+const charaOf = id => CHARAS.find(c=>c.id===id) || CHARAS.find(c=>c.id===OLD_CHARA[id]) || CHARAS[0];
+let svgSeq = 0;
+function charaSVG(id, lv, size){
+  const c = charaOf(id), H = c.hair, k = ++svgSeq, M = MOODS[lv];
+  const lum = (h=>{ const v=parseInt(h.slice(1),16); return (0.3*(v>>16)+0.59*((v>>8)&255)+0.11*(v&255))/255; })(c.skin);
+  const dark = lum < .45, ink = dark ? '#0b0605' : '#3a2a22', sk = dark ? 'rgba(0,0,0,.5)' : 'rgba(0,0,0,.28)', sw = dark ? 3.6 : 3;
+  let back='', front=''; const an = c.a ? animalParts(c) : null;
+  const fringe = `<path d="M29 60 Q27 23 60 23 Q93 23 91 60 Q88 40 74 36 Q62 46 40 39 Q32 46 29 60Z" fill="${H}"/>`;
+  if(!c.a) switch(c.hs){
+    case 'long': back=`<path d="M27 58 Q27 22 60 22 Q93 22 93 58 L95 106 Q60 114 25 106Z" fill="${H}"/>`; front=fringe; break;
+    case 'curlylong': back=`<path d="M26 58 Q26 20 60 20 Q94 20 94 58 L96 104 Q60 112 24 104Z" fill="${H}"/>`+[[24,70],[24,88],[96,70],[96,88],[28,102],[92,102],[30,40],[90,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9" fill="${H}"/>`).join(''); front=fringe; break;
+    case 'bob': back=`<path d="M26 60 Q26 22 60 22 Q94 22 94 60 L94 84 Q60 92 26 84Z" fill="${H}"/>`; front=fringe; break;
+    case 'bun': back=`<circle cx="60" cy="19" r="12" fill="${H}"/>`; front=`<path d="M29 58 Q27 23 60 23 Q93 23 91 58 Q86 36 60 34 Q34 36 29 58Z" fill="${H}"/>`; break;
+    case 'afro': back=`<circle cx="60" cy="48" r="41" fill="${H}"/>`; front=`<path d="M31 52 Q33 27 60 27 Q87 27 89 52 Q75 38 60 38 Q45 38 31 52Z" fill="${H}"/>`; break;
+    case 'braids': back=[0,1,2,3,4].map(i=>`<ellipse cx="30" cy="${62+i*10}" rx="6" ry="7" fill="${H}"/><ellipse cx="90" cy="${62+i*10}" rx="6" ry="7" fill="${H}"/>`).join(''); front=`<path d="M29 60 Q27 23 60 23 Q93 23 91 60 Q86 36 60 35 Q34 36 29 60Z" fill="${H}"/>`; break;
+    case 'curly': front=[[33,46],[40,34],[52,27],[66,27],[79,33],[87,45]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="11" fill="${H}"/>`).join(''); break;
+    case 'buzz': front=`<path d="M31 52 Q33 27 60 27 Q87 27 89 52 Q75 37 60 37 Q45 37 31 52Z" fill="${H}"/>`; break;
+    case 'side': front=`<path d="M29 58 Q27 24 60 24 Q93 24 91 54 Q80 36 52 40 Q38 42 29 58Z" fill="${H}"/>`; break;
+    default: front=`<path d="M29 56 Q28 25 60 24 Q92 25 91 56 Q86 40 72 38 Q60 44 46 38 Q34 42 29 56Z" fill="${H}"/>`;
+  }
+  const cap = c.cap ? `<path d="M29 48 Q30 18 60 18 Q90 18 91 48Z" fill="${c.cap}"/><path d="M26 48 Q60 38 94 48 Q60 55 26 48Z" fill="${c.cap}" stroke="rgba(0,0,0,.25)" stroke-width="1"/>` : '';
+  const beard = c.beard ? `<path d="M31 66 Q33 98 60 99 Q87 98 89 66 Q85 86 72 89 Q60 83 48 89 Q35 86 31 66Z" fill="${H}" opacity=".92"/>` : '';
+  const mus = (c.mus||c.beard) ? `<path d="M48 80 Q54 75 60 78 Q66 75 72 80 Q66 82 60 80 Q54 82 48 80Z" fill="${H}"/>` : '';
+  const blush = `<ellipse cx="38" cy="77" rx="6" ry="3.5" fill="#ff7b7b" opacity=".45"/><ellipse cx="82" cy="77" rx="6" ry="3.5" fill="#ff7b7b" opacity=".45"/>`;
+  const dotEyes = r=>`<ellipse cx="48" cy="65" rx="${r+2.6}" ry="${r+2}" fill="#fff"/><ellipse cx="72" cy="65" rx="${r+2.6}" ry="${r+2}" fill="#fff"/><circle cx="48" cy="65" r="${r}" fill="${ink}"/><circle cx="72" cy="65" r="${r}" fill="${ink}"/><circle cx="49.2" cy="63.8" r="1" fill="#fff"/><circle cx="73.2" cy="63.8" r="1" fill="#fff"/>`;
+  const st = 'stroke="'+ink+'" stroke-width="'+sw+'" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  const tear = (x,y,s=1)=>`<path d="M${x} ${y} q${-4*s} ${7*s} 0 ${10*s} q${4*s} ${-3*s} 0 ${-10*s}Z" fill="#5fb3f0"/>`;
+  let face='';
+  if(lv===0){
+    face = `<path d="M40 57 L54 52 M66 52 L80 57" ${st}/>
+      <path d="M42 61 L52 65 L42 69 M78 61 L68 65 L78 69" ${st}/>
+      <path d="M46 70 Q44 88 41 106" stroke="#5fb3f0" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M74 70 Q76 88 79 106" stroke="#5fb3f0" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
+      ${tear(22,64,1.1)}${tear(98,60,1.1)}${tear(16,82,.8)}${tear(104,80,.8)}
+      ${beard}<path d="M46 81 Q60 75 74 81 L70 96 Q60 100 50 96Z" fill="#6b1d1d"/><path d="M52 95 Q60 89 68 95 Q60 99 52 95Z" fill="#ff8a8a"/>`;
+  } else if(lv===1){
+    face = `<path d="M41 58 L53 54 M67 54 L79 58" ${st}/>${dotEyes(3.2)}${tear(46,71,1)}
+      ${beard}${mus}<path d="M50 90 Q60 82 70 90" ${st}/>`;
+  } else if(lv===2){
+    face = `<path d="M42 56 L54 56 M66 56 L78 56" ${st}/>${dotEyes(3.5)}
+      ${beard}${mus}<path d="M52 87 Q60 90 68 87" ${st}/>`;
+  } else if(lv===3){
+    face = `<path d="M42 54 Q48 51 54 54 M66 54 Q72 51 78 54" ${st}/>
+      <path d="M43 67 Q48 60 53 67 M67 67 Q72 60 77 67" ${st}/>${blush}
+      ${beard}${mus}<path d="M47 83 Q60 95 73 83" ${st}/>`;
+  } else {
+    face = `<path d="M41 52 Q48 47 55 52 M65 52 Q72 47 79 52" ${st}/>
+      <path d="M42 66 L51 62 L42 58 M78 66 L69 62 L78 58" ${st}/>${blush}
+      ${beard}<path d="M43 79 Q60 81 77 79 Q75 101 60 102 Q45 101 43 79Z" fill="#6b1d1d"/>
+      <path d="M44 80 Q60 82 76 80 L75 84 Q60 86 45 84Z" fill="#fff"/><ellipse cx="60" cy="96" rx="9" ry="5" fill="#ff8a8a"/>
+      ${['M14 26 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3Z','M104 20 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5Z','M108 78 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2Z'].map(d=>`<path d="${d}" fill="#fff"/>`).join('')}`;
+  }
+  return `<svg viewBox="0 0 120 120" width="${size}" height="${size}" class="face" aria-label="キャラクター（${M.t}）">
+    <defs><clipPath id="cc${k}"><circle cx="60" cy="60" r="58"/></clipPath></defs>
+    <circle cx="60" cy="60" r="58" fill="${M.bg}"/>
+    <g clip-path="url(#cc${k})">
+      ${an ? an.under : `${back}
+      <rect x="52" y="84" width="16" height="16" fill="${c.skin}"/>
+      <path d="M16 122 Q20 98 60 95 Q100 98 104 122Z" fill="${c.shirt}"/>
+      <circle cx="30" cy="64" r="6" fill="${c.skin}"/><circle cx="90" cy="64" r="6" fill="${c.skin}"/>
+      <ellipse cx="60" cy="62" rx="30" ry="33" fill="${c.skin}"/>
+      ${front}${cap}
+      <path d="M57 73 Q60 76 63 73" stroke="${sk}" stroke-width="2" fill="none" stroke-linecap="round"/>`}
+      ${face}${an ? an.over : ''}
+    </g></svg>`;
+}
+function charaPicker(onDone, first){
+  let sel = charaOf(db.chara).id;
+  const draw = ()=>{
+    openModal(`<h2 style="font-size:16px;margin:0 0 4px">${first?'キャラクターを選んでください':'キャラクターを選ぶ'}</h2>
+      <div class="muted" style="margin-bottom:10px">自分の釣果の数で表情が変わります。あとで「設定」から変えられます。</div>
+      ${[['人',CHARAS.filter(c=>!c.a)],['動物',CHARAS.filter(c=>c.a)]].map(([h,list])=>`<div class="muted" style="margin:8px 0 6px;font-weight:700">${h}</div>
+      <div class="cgrid">${list.map(c=>`<button class="cpick${c.id===sel?' on':''}" data-ch="${c.id}">${charaSVG(c.id,3,76)}</button>`).join('')}</div>`).join('')}
+      <div class="muted" style="margin:12px 0 4px">表情の見本（自分の釣果）</div>
+      <div class="cprev">${[[0,'0匹'],[1,'1〜3匹'],[2,'4〜6匹'],[3,'7〜9匹'],[4,'10匹〜']].map(([lv,l])=>`<div>${charaSVG(sel,lv,52)}<small>${l}<br>${MOODS[lv].t}</small></div>`).join('')}</div>
+      <button class="btn acc wide" style="margin-top:12px" id="chOk">このキャラにする</button>`);
+    document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{ const y=$('#modalBox').scrollTop; sel=b.dataset.ch; draw(); $('#modalBox').scrollTop=y; });
+    $('#chOk').onclick=()=>{ db.chara=sel; save(); closeModal(); if(onDone) onDone(); else render(); };
+  };
+  draw();
+}
+function showReaction(n){
+  const lv = moodLv(n);
+  openModal(`<div style="text-align:center;padding:6px 0 4px">
+    <div class="bounce">${charaSVG(db.chara,lv,170)}</div>
+    <div style="font-size:15px;color:var(--sub);margin-top:6px">${esc(db.me)}の釣果</div>
+    <div style="font-size:40px;font-weight:800;color:var(--acc);line-height:1.1">${n}<small style="font-size:18px"> 匹</small></div>
+    <div style="font-size:20px;font-weight:800;margin:6px 0 12px">${MOODS[lv].msg}</div>
+    <button class="btn wide" id="rxOk">OK</button></div>`);
+  $('#rxOk').onclick=closeModal;
+}
+
+/* ---------- 小物 ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function wday(ds){ if(!ds) return ''; const d=new Date(ds+'T12:00:00'); return '日月火水木金土'[d.getDay()]; }
+function opts(list, sel){ return list.map(v=>`<option value="${esc(v)}"${v===sel?' selected':''}>${esc(v||'—')}</option>`).join(''); }
+
+/* 月齢と潮名（目安）— 新月時刻は Meeus の計算式（主要補正項）で求める */
+function newMoonJDE(k){
+  const T=k/1236.85, rad=Math.PI/180;
+  let jde=2451550.09766+29.530588861*k+0.00015437*T*T;
+  const E=1-0.002516*T, M=(2.5534+29.1053567*k)*rad, Mp=(201.5643+385.81693528*k+0.0107582*T*T)*rad;
+  const F=(160.7108+390.67050284*k)*rad, Om=(124.7746-1.56375588*k)*rad;
+  jde+=-0.40720*Math.sin(Mp)+0.17241*E*Math.sin(M)+0.01608*Math.sin(2*Mp)+0.01039*Math.sin(2*F)
+      +0.00739*E*Math.sin(Mp-M)-0.00514*E*Math.sin(Mp+M)+0.00208*E*E*Math.sin(2*M)-0.00111*Math.sin(Mp-2*F)
+      -0.00057*Math.sin(Mp+2*F)+0.00056*E*Math.sin(2*Mp+M)-0.00042*Math.sin(3*Mp)+0.00042*E*Math.sin(M+2*F)
+      +0.00038*E*Math.sin(M-2*F)-0.00024*E*Math.sin(2*Mp-M)-0.00017*Math.sin(Om);
+  return jde;
+}
+const jdToMs = jd => (jd-2440587.5)*86400000;
+function lastNewMoon(ms){ // ms 以前で直近の新月時刻（UTCミリ秒）
+  const jd = ms/86400000+2440587.5;
+  let k = Math.floor((jd-2451550.09766)/29.530588861)+1;
+  while(jdToMs(newMoonJDE(k))>ms) k--;
+  return jdToMs(newMoonJDE(k));
+}
+function moonAge(ds){
+  const [y,m,d]=ds.split('-').map(Number);
+  const noon=Date.UTC(y,m-1,d,3,0); // 日本時間 正午
+  return (noon-lastNewMoon(noon))/86400000;
+}
+function kyuurekiDay(ds){ // 旧暦日の目安：新月の日（日本時間）を1日とする
+  const [y,m,d]=ds.split('-').map(Number);
+  const endOfDay=Date.UTC(y,m-1,d,15,0)-1; // 日本時間 23:59
+  const nm=lastNewMoon(endOfDay)+9*3600000;
+  const nmDay=Math.floor(nm/86400000), day=Math.floor((Date.UTC(y,m-1,d))/86400000);
+  return day-nmDay+1;
+}
+function tideName(ds){
+  if(!ds) return '';
+  const day = kyuurekiDay(ds);
+  if(day<=3 || day>=30) return '大潮';
+  if(day<=6) return '中潮';
+  if(day<=9) return '小潮';
+  if(day===10) return '長潮';
+  if(day===11) return '若潮';
+  if(day<=14) return '中潮';
+  if(day<=17) return '大潮';
+  if(day<=21) return '中潮';
+  if(day<=24) return '小潮';
+  if(day===25) return '長潮';
+  if(day===26) return '若潮';
+  return '中潮';
+}
+
+/* 満潮・干潮 */
+// 潮汐の調和定数による満潮・干潮の計算（気象庁 潮位表 2024〜2027年の予測値から求めた定数）
+const TIDE_CONS = {"names":["Sa","Ssa","Mm","MSf","Mf","2Q1","SIG1","Q1","RHO1","O1","P1","S1","K1","PSI1","PHI1","THE1","J1","SO1","OO1","EPS2","2N2","MU2","N2","NU2","M2","LDA2","L2","T2","S2","K2","2SM2","MO3","M3","MK3","SK3","MN4","M4","MS4","MK4","S4","2MN6","M6","2MS6","M8"],"out":{"SR":[110,[[14.15,153.6],[1.95,36.9],[0.66,91.1],[0.36,39.7],[0.77,105.8],[0.5,193.7],[0.55,192.4],[3.51,201.5],[0.62,201.1],[16.92,212.7],[7.17,231.5],[0.46,95.6],[21.95,233.4],[0.56,213.1],[0.29,221.4],[0.24,244.1],[1.14,253.4],[0.19,307.8],[0.7,276.1],[0.35,253.2],[1.14,252.6],[1.33,259.4],[8.51,256.9],[1.68,256.9],[47.56,261.5],[0.37,285.4],[1.44,272.9],[1.46,282.6],[21.55,286.2],[5.92,281.3],[0.07,176.9],[0.11,318.4],[0.51,313.5],[0.17,4.5],[0.15,161.6],[0.01,168.2],[0.06,235.6],[0.09,228.1],[0.02,268.2],[0.07,325.1],[0.03,54.8],[0.05,75.5],[0.04,100.1],[0.01,22.3]]],"GB":[110,[[14.8,151.9],[1.86,32.3],[0.76,93.5],[0.27,25.3],[0.53,93.5],[0.48,192],[0.55,194.7],[3.54,201],[0.62,202],[17.03,212.8],[7.05,231.1],[0.31,171.6],[22.02,232.9],[0.65,226],[0.23,235.2],[0.21,245.1],[1.09,255],[0.18,321.1],[0.72,280.5],[0.35,253.7],[1.21,252.6],[1.38,256.7],[8.69,258.7],[1.65,259.6],[48.17,263.2],[0.33,278.5],[1.41,274.3],[1.57,286.1],[21.9,287.7],[5.97,283],[0.06,172.7],[0.09,6],[0.52,315.2],[0.18,13.5],[0.2,164.6],[0.02,172.6],[0.08,222.4],[0.11,237.8],[0.03,255.9],[0.08,301.4],[0.06,55],[0.11,68.6],[0.1,99],[0,93.4]]],"H1":[110,[[13.43,151.9],[1.19,124],[0.29,77.2],[0.23,343.8],[0.87,99.2],[0.49,194.1],[0.55,193.6],[3.72,204],[0.67,201],[18.15,215.8],[7.47,233.7],[0.52,93.1],[23.86,237.1],[0.53,268.1],[0.29,217.9],[0.33,243],[1.26,259.6],[0.14,358.4],[0.75,286.6],[0.59,237.2],[1.2,264.2],[2.41,246.1],[8.33,270.3],[1.33,272.5],[45.03,275.9],[0.1,1],[0.91,290.7],[1.48,295.3],[21.47,298.9],[5.68,294.3],[0.17,312.6],[0.83,57.6],[0.64,330.6],[0.85,64.8],[0.36,153.3],[0.15,146.5],[0.38,162.4],[0.33,194.7],[0.34,195.7],[0.06,53.6],[0.34,69.2],[0.7,80.9],[0.76,109],[0,356.7]]],"Z9":[111,[[15.43,151.2],[1.54,34],[0.65,97.3],[0.14,356.2],[0.61,107.3],[0.5,196.9],[0.53,196.6],[3.74,203.1],[0.64,205.4],[18.34,215.3],[7.66,233.8],[0.68,129.6],[24.04,236.2],[0.6,228],[0.28,225.1],[0.25,245.6],[1.19,256.9],[0.2,4.1],[0.74,285.5],[0.59,240.3],[1.26,265.1],[2.47,248.3],[8.46,271.9],[1.37,277.5],[44.47,276],[0.01,355.2],[0.84,293.3],[1.41,294.8],[21.38,297.8],[5.7,293.7],[0.27,335.1],[0.67,60],[0.64,332.4],[0.66,60.3],[0.39,151.7],[0.19,182.4],[0.54,203.8],[0.47,237.7],[0.22,230.7],[0.07,320.4],[0.32,77.5],[0.6,86.8],[0.64,112],[0.01,321.3]]],"WY":[111,[[15.33,151.4],[1.39,33],[0.64,101.5],[0.14,318.7],[0.62,108.2],[0.49,196.9],[0.52,196.3],[3.75,203.4],[0.63,204.7],[18.36,215.7],[7.67,234.1],[0.6,129.2],[24.05,236.6],[0.62,226.6],[0.27,227.5],[0.25,244.3],[1.19,257.9],[0.22,359.5],[0.75,287],[0.61,240.6],[1.26,266.7],[2.55,248.1],[8.39,273.1],[1.33,279.3],[43.87,277.3],[0.03,94.4],[0.78,295.4],[1.42,296.3],[21.23,298.9],[5.63,294.8],[0.31,334.7],[0.73,58.4],[0.65,333.6],[0.72,55.9],[0.4,151.2],[0.21,174.2],[0.6,197.2],[0.5,233.5],[0.24,227],[0.08,325.9],[0.44,78.9],[0.83,89.8],[0.89,113.4],[0,205.2]]],"TN":[95,[[15.42,152],[1.2,11.4],[0.74,102.6],[0.2,294],[0.77,68.8],[0.48,206.2],[0.39,228.6],[3.8,211.7],[0.7,212.4],[19.08,223.9],[7.91,243.5],[0.51,147.1],[25.39,245.7],[0.74,233],[0.28,243],[0.25,253.9],[1.1,273.6],[0.56,59.7],[0.73,304.4],[0.9,239.6],[1.05,282.1],[3.88,251.3],[6.59,290.8],[0.84,319.5],[31.75,294.7],[0.47,114.1],[0.34,55.1],[1.28,306.9],[17.51,311.2],[4.41,311.9],[0.74,354.5],[1.34,76.8],[0.7,353.5],[1.17,78.8],[0.63,158.4],[0.41,190.7],[1.2,206.6],[0.96,242.1],[0.47,237.3],[0.07,314.1],[0.63,109.9],[1.19,123],[1.27,147],[0.01,86.4]]],"KK":[95,[[17.91,151.7],[2.36,55.8],[0.43,140.7],[0.5,208.2],[0.62,49.7],[0.44,204],[0.37,214.1],[3.84,213.3],[0.67,212.3],[19.2,226.8],[7.89,244.8],[0.51,196],[25.3,247.9],[0.67,237],[0.31,236.7],[0.32,257.4],[1.09,277.4],[0.67,53.8],[0.76,310.8],[1,241.1],[1.05,289.2],[4.17,251.1],[6.38,294.8],[0.88,321.7],[30.02,299],[0.57,117.3],[0.49,79.4],[1.2,311.1],[16.95,314],[4.3,312.7],[0.85,356.7],[1.28,81.4],[0.56,354.7],[0.8,73.6],[0.6,160.4],[0.32,151.4],[0.82,175.5],[0.57,224.2],[0.52,229.9],[0.07,339.9],[0.66,109.5],[1.23,121.4],[1.28,146.4],[0.01,212.6]]],"J2":[95,[[0,278.4],[0,173],[1.31,227.1],[1.3,80.9],[1.16,58.7],[0,69.9],[0,48.1],[4.13,213],[0.56,208.3],[19.85,225.2],[8.22,242.8],[0.95,83],[25.96,248.3],[0.56,329.6],[0.47,226.7],[0.01,22.8],[0.86,266.3],[0.74,76.5],[0.51,289],[0,204.7],[1.26,302.9],[4.35,254.5],[6.49,292.9],[0.89,313.2],[31.39,301.1],[0.66,88],[1.1,20.2],[1.08,309.3],[16.73,316.5],[4.84,309.6],[0.89,6.6],[1.65,78.6],[0.45,15.8],[1.43,101.5],[0.72,166.4],[0,25.6],[1.26,227],[1.12,269.2],[0,21.4],[0,35.3],[0,159.1],[1.38,135.5],[1.52,174.8],[0,37.3]]],"IO":[95,[[20.05,150.9],[4.76,196.2],[0.98,90.8],[0.96,242.7],[1.24,238],[0.6,249.2],[0.34,246.4],[3.62,212],[0.93,197.4],[19.16,225.5],[8.02,244.5],[1.1,127.3],[25.9,247.7],[0.46,265],[0.08,126.9],[0.78,242.2],[1.28,283.8],[0.56,92.9],[0.23,233.7],[0.98,243.2],[1.25,278.4],[4.33,254.6],[6.24,297.4],[1.13,320.4],[30.36,302.8],[0.32,75.9],[0.81,95.6],[1.56,319.4],[17.34,315.5],[4.39,318.2],[0.78,343.4],[1.98,93.6],[0.36,348],[1.42,97.8],[0.71,165.6],[0.5,206.1],[1.43,222.9],[1.21,254.9],[0.63,229.8],[0.14,335.2],[0.88,122.2],[1.72,136.9],[1.77,157.5],[0,276.7]]],"SI":[95,[[13.23,148.2],[6.14,162.8],[0.41,309],[1.28,204.4],[1.07,139.1],[0.67,209.9],[0.14,16.5],[4.12,210.7],[0.76,233.7],[19.65,225.7],[8.19,247.6],[1.06,112.5],[26.35,247.2],[0.66,253.7],[0.08,30.3],[0.62,241.3],[1.18,278.5],[0.46,80.3],[0.56,315],[1.1,238.6],[0.33,222.4],[4.48,257.1],[6.39,294.7],[1.01,4.7],[30.6,302.8],[0.35,112.5],[0.45,35.9],[1.35,306.9],[17.31,317.4],[4.41,319.3],[0.86,9.9],[1.5,95],[1.13,14.5],[1.2,101],[1.01,184],[0.43,226.9],[1.23,228.6],[1.19,256.4],[0.56,247.2],[0.1,312.5],[0.62,135.2],[1.51,149.7],[1.62,175.3],[0,19.6]]],"OS":[95,[[15.15,151.2],[1.08,14.7],[0.64,104.4],[0.19,297.2],[0.81,89.3],[0.52,205.5],[0.42,238.6],[3.83,213.7],[0.7,211.3],[19.48,225.9],[8.02,245.3],[0.81,123.1],[26.04,248.2],[0.73,238.6],[0.26,239],[0.28,264.3],[1.1,275.8],[0.71,65.7],[0.69,308.3],[1.03,240],[1.08,290.1],[4.34,252.2],[6.41,299.5],[0.84,337.1],[29.88,304.4],[0.64,113.1],[0.72,74.5],[1.24,317.3],[16.88,316.9],[4.22,317.2],[0.92,353.6],[1.79,86.7],[0.78,1.7],[1.39,94.3],[0.8,159.2],[0.5,199.9],[1.43,216.3],[1.18,251.7],[0.58,242],[0.09,324.3],[1.02,120.3],[1.95,133.8],[2.06,157.8],[0,280.2]]],"TB":[120,[[12.98,150.7],[2.1,28.8],[0.73,87.1],[0.31,340.1],[0.89,107.6],[0.51,188.3],[0.61,196.7],[3.59,200.4],[0.64,203.9],[17.26,210.3],[7.63,228],[0.63,64.4],[23.18,230.7],[0.23,238],[0.25,199.4],[0.31,244.8],[1.24,251.2],[0.3,322],[0.76,281.8],[0.43,273.2],[1.29,258.8],[1.68,276.4],[9.41,261.2],[1.82,260.9],[54.35,264.7],[0.47,256],[1.81,270.3],[1.68,286.1],[25.39,290.5],[7.03,286.2],[0.14,102.8],[0.4,55.4],[0.92,327.2],[0.58,65.6],[0.48,170.8],[0.15,184.9],[0.34,183.8],[0.3,218.8],[0.12,209.6],[0.13,134.7],[0.01,195],[0.02,202.7],[0.04,237.5],[0,201]]],"K1":[90,[[16.91,150.4],[1.9,30.1],[0.6,73.2],[0.82,23],[1.56,56.1],[0.45,232.8],[0.95,314.6],[3.85,235.1],[0.72,224.1],[20.72,246.5],[8.13,271.6],[0.75,157.4],[28.05,270.7],[0.66,263.3],[0.24,260.7],[0.36,266.3],[1.17,324.3],[1.96,74.9],[0.93,0],[1.29,229.4],[0.78,6.4],[5.42,243.2],[5.89,32.3],[2.19,51.6],[33.52,50.5],[1.39,110.9],[2.93,91.9],[0.57,46.8],[8.44,53],[2.89,59.6],[1.37,0.1],[1.26,96.6],[0.52,52.3],[1.13,108.9],[0.38,191.1],[0.43,235],[1.22,246.4],[0.95,276.8],[0.33,282],[0.08,295.7],[0.31,0.9],[0.64,9],[0.77,39.7],[0,306.5]]],"XM":[18,[[18.01,164.2],[2.15,249.6],[0.44,125.7],[0.2,311.2],[1.45,191.8],[0.24,339.8],[0.13,302.7],[1.21,342.1],[0.24,345.2],[5.23,0.3],[1.66,23.2],[0.39,106.1],[5.1,27.3],[0.1,66.7],[0.08,358],[0.09,24.3],[0.21,53],[0.09,193.9],[0.2,66.2],[0.07,74.2],[0.22,120.1],[0.48,111.3],[1.54,149.8],[0.23,152.5],[5.73,162.7],[0.04,78],[0.07,127],[0.22,181.7],[2.07,183.7],[0.57,172.6],[0.03,272.6],[0.03,348.1],[0.04,201.5],[0.05,9],[0.06,65.1],[0.15,237.3],[0.3,259.2],[0.14,302],[0.06,267.9],[0.02,54.8],[0.03,205.5],[0.05,230.4],[0.08,281.9],[0,112]]]}};
+const TIDE_DEF = {
+ Sa:[0,0,1,0,0,0,'1'], Ssa:[0,0,2,0,0,0,'1'], Mm:[0,1,0,-1,0,0,'Mm'], MSf:[0,2,-2,0,0,0,'-M2'], Mf:[0,2,0,0,0,0,'Mf'],
+ '2Q1':[1,-3,0,2,0,-90,'O1'], SIG1:[1,-3,2,0,0,-90,'O1'], Q1:[1,-2,0,1,0,-90,'O1'], RHO1:[1,-2,2,-1,0,-90,'O1'], O1:[1,-1,0,0,0,-90,'O1'],
+ P1:[1,1,-2,0,0,-90,'1'], S1:[1,1,-1,0,0,180,'1'], K1:[1,1,0,0,0,90,'K1'], PSI1:[1,1,1,0,-1,90,'1'], PHI1:[1,1,2,0,0,90,'1'], THE1:[1,2,-2,1,0,90,'J1'], J1:[1,2,0,-1,0,90,'J1'], SO1:[1,3,-2,0,0,90,'-O1'], OO1:[1,3,0,0,0,90,'OO1'],
+ EPS2:[2,-3,2,1,0,0,'M2'], '2N2':[2,-2,0,2,0,0,'M2'], MU2:[2,-2,2,0,0,0,'M2'], N2:[2,-1,0,1,0,0,'M2'], NU2:[2,-1,2,-1,0,0,'M2'], M2:[2,0,0,0,0,0,'M2'], LDA2:[2,1,-2,1,0,180,'M2'], L2:[2,1,0,-1,0,180,'M2'], T2:[2,2,-3,0,1,0,'1'], S2:[2,2,-2,0,0,0,'1'], K2:[2,2,0,0,0,0,'K2'], '2SM2':[2,4,-4,0,0,0,'-M2'],
+ MO3:[3,-1,0,0,0,-90,'M2O1'], M3:[3,0,0,0,0,180,'M3'], MK3:[3,1,0,0,0,90,'M2K1'], SK3:[3,3,-2,0,0,90,'K1'],
+ MN4:[4,-1,0,1,0,0,'M2^2'], M4:[4,0,0,0,0,0,'M2^2'], MS4:[4,2,-2,0,0,0,'M2'], MK4:[4,2,0,0,0,0,'M2K2'], S4:[4,4,-4,0,0,0,'1'],
+ '2MN6':[6,-1,0,1,0,0,'M2^3'], M6:[6,0,0,0,0,0,'M2^3'], '2MS6':[6,2,-2,0,0,0,'M2^2'], M8:[8,0,0,0,0,0,'M2^4']
+};
+function tideNodal(N){
+  const R=Math.PI/180, n=N*R, c=Math.cos, si=Math.sin;
+  const fM2=1.0004-0.0373*c(n)+0.0002*c(2*n), uM2=-2.14*si(n);
+  const fK1=1.0060+0.1150*c(n)-0.0088*c(2*n)+0.0006*c(3*n), uK1=-8.86*si(n)+0.68*si(2*n)-0.07*si(3*n);
+  const fO1=1.0089+0.1871*c(n)-0.0147*c(2*n)+0.0014*c(3*n), uO1=10.80*si(n)-1.34*si(2*n)+0.19*si(3*n);
+  const fK2=1.0241+0.2863*c(n)+0.0083*c(2*n)-0.0015*c(3*n), uK2=-17.74*si(n)+0.68*si(2*n)-0.04*si(3*n);
+  const fJ1=1.0129+0.1676*c(n)-0.0170*c(2*n)+0.0016*c(3*n), uJ1=-12.94*si(n)+1.34*si(2*n)-0.19*si(3*n);
+  const fOO=1.1027+0.6504*c(n)+0.0317*c(2*n)-0.0014*c(3*n), uOO=-36.68*si(n)+4.02*si(2*n)-0.57*si(3*n);
+  const fMm=1.0000-0.1300*c(n)+0.0013*c(2*n), fMf=1.0429+0.4135*c(n)-0.004*c(2*n), uMf=-23.74*si(n)+2.68*si(2*n)-0.38*si(3*n);
+  return {'1':[1,0],O1:[fO1,uO1],'-O1':[fO1,-uO1],K1:[fK1,uK1],J1:[fJ1,uJ1],OO1:[fOO,uOO],M2:[fM2,uM2],'-M2':[fM2,-uM2],K2:[fK2,uK2],
+    M2K1:[fM2*fK1,uM2+uK1],M2O1:[fM2*fO1,uM2+uO1],M2K2:[fM2*fK2,uM2+uK2],M3:[fM2**1.5,1.5*uM2],'M2^2':[fM2**2,2*uM2],'M2^3':[fM2**3,3*uM2],'M2^4':[fM2**4,4*uM2],Mm:[fMm,0],Mf:[fMf,uMf]};
+}
+const TIDE_MIX = { YR: [['GB',0.5],['H1',0.5]] }; // 由良推定＝御坊と下津の平均
+function tideHas(stn){ return !!(TIDE_CONS.out[stn] || TIDE_MIX[stn]); }
+function tideHeight(stn, ms){ // ms: UTCミリ秒 → 潮位(cm)
+  if(TIDE_MIX[stn]) return TIDE_MIX[stn].reduce((a,[k,w])=>a+w*tideHeight(k,ms),0);
+  const st=TIDE_CONS.out[stn]; if(!st) return null;
+  const R=Math.PI/180, T=(ms/86400000+2440587.5-2451545.0)/36525;
+  const s=218.3165+481267.8813*T, h=280.4661+36000.7698*T, p=83.3535+4069.0137*T, N=125.0445-1934.1363*T, p1=282.9384+1.7195*T;
+  const ut=((ms/3600000)%24+24)%24, tau=15*ut+180+h-s, nf=tideNodal(N);
+  let z=st[0];
+  TIDE_CONS.names.forEach((k,i)=>{ const q=TIDE_DEF[k], [H,g]=st[1][i]; if(!H) return;
+    const V=q[0]*tau+q[1]*s+q[2]*h+q[3]*p+q[4]*p1+q[5], [f,u]=nf[q[6]];
+    z+=f*H*Math.cos((V+u-g)*R); });
+  return z;
+}
+function tideExtremes(stn, ds){ // ds:'YYYY-MM-DD'（日本時間）→ {high:[{t,cm}], low:[...]}
+  if(!tideHas(stn)) return null;
+  const [y,m,d]=ds.split('-').map(Number), step=120000;
+  const t0=Date.UTC(y,m-1,d,-9,0)-6*3600000; // 前後に余裕を持って計算
+  const pts=[]; for(let k=0;k<=(36*3600000)/step;k++){ const t=t0+k*step; pts.push([t,tideHeight(stn,t)]); }
+  let ex=[];
+  for(let i=1;i<pts.length-1;i++){ const a=pts[i-1][1], b=pts[i][1], c=pts[i+1][1];
+    if((b>a&&b>=c)||(b<a&&b<=c)){ const den=a-2*b+c, off=den?0.5*(a-c)/den:0; ex.push({type:b>a?'H':'L', t:pts[i][0]+off*step, cm:b-0.25*(a-c)*off}); } }
+  // 小さな上下（5cm未満）は取り除く（潮位表と同じく、目立たない満干は載せない）
+  let changed=true;
+  while(changed){ changed=false;
+    for(let i=0;i<ex.length-1;i++){ if(Math.abs(ex[i].cm-ex[i+1].cm)<5){ ex.splice(i,2); changed=true; break; } }
+    for(let i=0;i<ex.length-1;i++){ if(ex[i].type===ex[i+1].type){ const keep = ex[i].type==='H' ? (ex[i].cm>=ex[i+1].cm?i:i+1) : (ex[i].cm<=ex[i+1].cm?i:i+1); ex.splice(keep===i?i+1:i,1); changed=true; break; } }
+  }
+  const out={stn, date:ds, high:[], low:[], calc:true};
+  for(const e of ex){ const j=new Date(e.t+9*3600000); if(j.getUTCFullYear()!==y||j.getUTCMonth()!==m-1||j.getUTCDate()!==d) continue;
+    const x={t:`${j.getUTCHours()}:${String(j.getUTCMinutes()).padStart(2,'0')}`, cm:Math.round(e.cm)}; (e.type==='H'?out.high:out.low).push(x); }
+  return out;
+}
+
+
+function tideTimesStr(tt, short){
+  if(!tt) return '';
+  const f = a => (a||[]).map(x=> short ? x.t : `${x.t}(${x.cm}cm)`).join('・');
+  return short ? `満 ${f(tt.high)} / 干 ${f(tt.low)}` : `満潮 ${f(tt.high)}　干潮 ${f(tt.low)}　〔${stnName(tt.stn)}〕`;
+}
+function tideChartSVG(t, o={}){
+  const stn = (t.tideTimes&&t.tideTimes.stn) || db.tideStn[t.place] || '';
+  if(!t.date || !stn || !tideHas(stn)) return '';
+  const fs=o.fs||11, W=o.w||600, H=o.h||200, L=fs*3.2, R=fs*1.3, Tp=fs*1.6, B=fs*1.9;
+  const [y,m,d]=t.date.split('-').map(Number), base=Date.UTC(y,m-1,d,-9,0);
+  const H0=6, H1=15; // 表示は6時〜15時
+  const pts=[]; for(let i=H0*6;i<=H1*6;i++){ pts.push([i/6, tideHeight(stn, base+i*600000)]); }
+  let lo=Math.min(...pts.map(p=>p[1])), hi=Math.max(...pts.map(p=>p[1]));
+  lo=Math.floor((lo-10)/50)*50; hi=Math.ceil((hi+10)/50)*50;
+  const X=h=>L+(W-L-R)*(h-H0)/(H1-H0), Y=v=>Tp+(H-Tp-B)*(hi-v)/(hi-lo);
+  const toH=s=>{ const m=String(s||'').match(/^(\d{1,2}):(\d{2})/); return m? +m[1]+(+m[2])/60 : null; };
+  let g='';
+  const s0=null, e0=null; // 開始・終了時刻は使わない
+  if(s0!=null||e0!=null){ const a=s0??0, b=e0??24; g+=`<rect x="${X(a)}" y="${Tp}" width="${Math.max(0,X(b)-X(a))}" height="${H-Tp-B}" fill="#f28c28" opacity=".15"/><text x="${(X(a)+X(b))/2}" y="${Tp+fs}" font-size="${fs}" fill="#a95c0d" text-anchor="middle">釣り時間</text>`; }
+  for(let v=lo; v<=hi; v+=50) g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#d7e2e8" stroke-width="1"/><text x="${L-4}" y="${Y(v)+fs/3}" font-size="${fs}" fill="#5f7682" text-anchor="end">${v}</text>`;
+  for(let h=H0; h<=H1; h++) g+=`<line x1="${X(h)}" x2="${X(h)}" y1="${Tp}" y2="${H-B}" stroke="#d7e2e8" stroke-width="1"/><text x="${X(h)}" y="${H-B+fs+3}" font-size="${fs}" fill="#5f7682" text-anchor="middle">${h}時</text>`;
+  const line = pts.map((p,i)=>`${i?'L':'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('');
+  g+=`<path d="${line}L${X(H1)},${H-B}L${X(H0)},${H-B}Z" fill="#0b4f6c" opacity=".12"/><path d="${line}" fill="none" stroke="#0b4f6c" stroke-width="2"/>`;
+  const ex = tideExtremes(stn, t.date);
+  for(const [arr,col,dy] of [[ex.high,'#c0392b',-6],[ex.low,'#1f6fb2',fs+6]]) for(const e of arr){ const h=toH(e.t); if(h==null || h<H0 || h>H1) continue;
+    const yy=Y(e.cm); g+=`<circle cx="${X(h)}" cy="${yy}" r="3.5" fill="${col}"/><text x="${Math.min(Math.max(X(h),L+24),W-R-24)}" y="${Math.min(Math.max(yy+dy,Tp+fs),H-B-3)}" font-size="${fs}" fill="${col}" text-anchor="middle" font-weight="700">${e.t} ${e.cm}</text>`; }
+  g+=`<text x="${L}" y="${Tp-4}" font-size="${fs}" fill="#17323f">潮位(cm) 6〜15時〔${esc(stnName(stn))}〕${esc(t.tide||'')}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;max-width:${W}px" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">${g}</svg>`;
+}
+function updateTideChart(t){ const el=document.getElementById('tideChart'); if(el && draft===t) el.innerHTML = tideChartSVG(t,{w:600,h:260,fs:17}); }
+
+async function fetchTide(t, manual){
+  const stn = db.tideStn[t.place]||'';
+  const box = document.getElementById('tideTimes');
+  const show = msg => { if(box && draft===t) box.innerHTML = msg; };
+  if(!t.date) return;
+  if(!stn){ if(manual) toast('この釣り場には観測地点が設定されていません（設定で選べます）'); show(t.tideTimes?esc(tideTimesStr(t.tideTimes)):'<span class="muted">観測地点が未設定の釣り場です</span>'); return; }
+  if(!manual && t.tideTimes && t.tideTimes.stn===stn && t.tideTimes.date===t.date) return;
+  try{
+    const r = tideExtremes(stn, t.date); // アプリ内で計算（通信なし）
+    if(!r) throw new Error('この観測地点は計算できません');
+    t.tideTimes = r; show(esc(tideTimesStr(t.tideTimes))); updateTideChart(t);
+  }catch(e){ show(`<span class="muted">計算できませんでした（${esc(e.message||'')}）</span>`); }
+}
+
+/* 集計補助 */
+function seatPos(t,p){ return (t.seats||{})[p] || (p===db.me && !(t.rafts||{})[p] ? (t.ikada||'') : ''); }
+function seatOf(t,p){ // 印刷・CSV用：「紀州A-東南」「チヌ7・8」の形
+  const r=(t.rafts||{})[p]||'', s=seatPos(t,p);
+  if(!r) return s; if(!s) return r;
+  return /^[0-9０-９]/.test(s) ? r+s : r+'-'+s;
+}
+function orderMembers(t){ const ms=tripMembers(t); return ms.includes(db.me) ? [db.me, ...ms.filter(p=>p!==db.me)] : ms; }
+function tripMembers(t){ const ms = t.members && t.members.length ? t.members.slice() : [db.me]; return ms; }
+function personTotal(t,p){ const c=(t.counts||{})[p]||{}; return Object.values(c).reduce((a,b)=>a+(+b||0),0); }
+function tripTotal(t){ return Object.keys(t.counts||{}).reduce((a,p)=>a+personTotal(t,p),0); }
+function tripFishTotals(t){
+  const r={}; for(const p in (t.counts||{})) for(const f in t.counts[p]){ const n=+t.counts[p][f]||0; if(n) r[f]=(r[f]||0)+n; }
+  return r;
+}
+
+/* ---------- 画面切替 ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  const v=b.dataset.nav;
+  if(v==='edit') startNew(); else go(v);
+});
+function go(v){
+  view=v; delArm=false;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.nav===v));
+  render(); window.scrollTo(0,0);
+}
+function render(){
+  $('#hdrSub').textContent = db.trips.length ? `${db.trips.length}釣行` : '';
+  ({list:renderList, edit:renderEdit, stats:renderStats, settings:renderSettings, print:renderPrint})[view]();
+}
+
+/* ---------- 一覧 ---------- */
+function years(){ return [...new Set(db.trips.map(t=>(t.date||'').slice(0,4)).filter(Boolean))].sort().reverse(); }
+function filtered(){
+  return db.trips.filter(t => (filt.year==='all' || (t.date||'').startsWith(filt.year)) && (filt.place==='all' || t.place===filt.place));
+}
+function filterBar(){
+  const pl=[...new Set(db.trips.map(t=>t.place).filter(Boolean))];
+  return `<div class="row" style="margin-bottom:10px">
+    <select id="fYear"><option value="all">全期間</option>${years().map(y=>`<option value="${y}"${filt.year===y?' selected':''}>${y}年</option>`).join('')}</select>
+    <select id="fPlace"><option value="all">全釣り場</option>${pl.map(p=>`<option value="${esc(p)}"${filt.place===p?' selected':''}>${esc(p)}</option>`).join('')}</select>
+  </div>`;
+}
+function bindFilter(){
+  $('#fYear').onchange=e=>{filt.year=e.target.value; render();};
+  $('#fPlace').onchange=e=>{filt.place=e.target.value; render();};
+}
+function renderList(){
+  const trips = filtered().sort((a,b)=>(b.date+(b.start||'')).localeCompare(a.date+(a.start||'')));
+  let h = storageOK ? '' : '<div class="warn">この画面ではデータが保存されない可能性があります。設定→バックアップでこまめに書き出してください。</div>';
+  if(!db.trips.length){
+    $('#app').innerHTML = h + `<div class="card empty">まだ記録がありません。<br>トップ（🎣 釣果記録）の「➕ 新規記録」から記録できます。
+      <br><br><button class="btn sub" id="lstLoad">📂 保存したデータを読み込む</button></div>`;
+    $('#lstLoad').onclick=pickDataFile; return;
+  }
+  h += filterBar();
+  h += `<div class="row" style="margin-bottom:6px"><button class="btn" id="lstSave">💾 データを保存</button><button class="btn sub" id="lstLoad">📂 データを読み込む</button></div>
+    <div class="muted" style="margin-bottom:10px;text-align:center">${lastSavedText()}</div>`;
+  h += `<button class="btn sub wide" id="toPrint" style="margin-bottom:10px">🖨 印刷用の表示</button>`;
+  h += trips.map(t=>{
+    const ft = tripFishTotals(t); const tot = tripTotal(t); const mine = personTotal(t, db.me);
+    const fishTags = Object.entries(ft).sort((a,b)=>b[1]-a[1]).map(([f,n])=>`<span class="tag">${esc(f)} ${n}</span>`).join('');
+    const inMe = tripMembers(t).includes(db.me), mc = (t.counts||{})[db.me]||{};
+    const myTags = Object.entries(mc).filter(([,n])=>+n>0).sort((a,b)=>b[1]-a[1]).map(([f,n])=>`<span class="tag o">${esc(f)} ${n}</span>`).join('');
+    const multi = tripMembers(t).length>1;
+    return `<div class="card trip" data-id="${t.id}">
+      <div class="top"><div><span class="dt">${esc(t.date)}（${wday(t.date)}）</span> <span class="pl">${esc(t.place||'')}${seatOf(t,db.me)?' / 釣座 '+esc(seatOf(t,db.me)):''}</span></div>
+      ${inMe?'':`<div style="white-space:nowrap"><span class="big">${tot}</span><span class="muted"> 匹</span></div>`}</div>
+      ${inMe?`<div class="mybox">${charaSVG(db.chara,moodLv(mine),48)}<div style="flex:1;min-width:0">
+        <div class="mn">👤 ${esc(db.me)}の釣果 <b>${mine}</b>匹</div>
+        <div class="tags" style="margin:4px 0 0">${myTags || '<span class="muted">ボウズ</span>'}</div></div></div>`:''}
+      <div class="tags">
+        ${t.tide?`<span class="tag">🌙 ${esc(t.tide)}</span>`:''}
+        ${t.waterTemp!==''&&t.waterTemp!=null?`<span class="tag">🌡 水温 ${esc(t.waterTemp)}℃</span>`:''}
+        ${t.tideTimes?`<span class="tag">⏱ ${esc(tideTimesStr(t.tideTimes,true))}</span>`:''}
+        ${t.weather?`<span class="tag">${esc(t.weather)}</span>`:''}
+        ${(t.baits||[]).length?`<span class="tag">🦐 ${t.baits.map(esc).join('・')}</span>`:''}
+        <span class="tag">👥 ${tripMembers(t).length}人</span>
+      </div>
+      ${multi||!inMe?`<div class="tags"><span class="muted" style="font-size:12px;align-self:center">全員 ${tot}匹：</span>${fishTags || '<span class="muted">釣果なし</span>'}</div>`:''}
+      ${(t.photos||[]).length?`<div class="thumbs">${t.photos.slice(0,5).map(id=>`<img data-pid="${id}">`).join('')}${t.photos.length>5?`<span class="muted" style="align-self:center">+${t.photos.length-5}</span>`:''}</div>`:''}
+    </div>`;
+  }).join('') || '<div class="card empty">条件に合う記録がありません</div>';
+  $('#app').innerHTML = h;
+  fillPhotos();
+  bindFilter();
+  $('#toPrint').onclick=()=>go('print');
+  $('#lstSave').onclick=saveDataFile; $('#lstLoad').onclick=pickDataFile;
+  document.querySelectorAll('.trip').forEach(el=>el.onclick=()=>openTrip(el.dataset.id));
+}
+
+/* ---------- 新規・編集 ---------- */
+function blankTrip(){
+  const last = db.trips.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const d = today();
+  return {id:uid(), date:d, start:'', end:'', place: last?last.place:(db.places[0]||''), ikada:'', rafts:{}, seats:{}, pnotes:{}, photos:[],
+    weather:'', wind:'', airTemp:'', waterTemp:'', tide:tideName(d), tideAuto:true,
+    flowSpeed:'', flowDir:'', flowNote:'', baits:[], bait:'', memo:'',
+    members:[db.me], counts:{}, details:[], isNew:true};
+}
+function draftDirty(){ const t=draft; if(!t) return false; if(!t.isNew) return true;
+  return tripTotal(t)>0 || (t.members||[]).length>1 || (t.baits||[]).length>0 || !!t.memo || (t.photos||[]).length>0 || !!t.waterTemp || !!t.weather || !!t.windDir || !!t.windPow; }
+function startNew(){ draft = blankTrip(); curPerson = db.me; lastLv = null; go('edit'); }
+function openTrip(id){
+  const t = db.trips.find(x=>x.id===id); if(!t) return;
+  draft = JSON.parse(JSON.stringify(t)); draft.isNew=false;
+  if(!draft.members || !draft.members.length) draft.members=[db.me];
+  curPerson = draft.members.includes(db.me) ? db.me : draft.members[0]; lastLv = null; go('edit');
+}
+
+function renderEdit(){
+  if(!draft){ draft = blankTrip(); curPerson = db.me; }
+  const t = draft;
+  const allPeople = [...new Set([db.me, ...db.people, ...t.members])];
+  const anySeat = t.members.some(p=>(t.rafts||{})[p]||seatPos(t,p));
+  const H = (no,title,tag,req)=>`<h2 class="st"><span class="no">${no}</span>${title}${tag?`<span class="tg${req?' req':''}">${tag}</span>`:''}</h2>`;
+  $('#app').innerHTML = `
+  <div class="stepnav">
+    <a href="#st1">①いつ・どこ</a><a href="#st2">②だれと</a><a href="#st3">③釣果</a><a href="#st4">④エサ・メモ</a><a href="#st5">⑤写真</a><a href="#st6">⑥潮・天気</a>
+  </div>
+  <div class="muted" style="margin:0 2px 8px">${t.isNew?'新しい釣行を記録します。':'釣行を直しています。'}上から順に入れて、最後に「保存」を押してください。日付以外は空欄でもOKです。</div>
+
+  <div class="card" id="st1">${H(1,'いつ・どこで','必須',1)}
+    <label>日付</label><input type="date" data-f="date" value="${esc(t.date)}">
+    <label>釣り場</label>
+    <div class="row">
+      <select data-f="place">${opts(['',...new Set([...db.places, t.place].filter(Boolean))], t.place)}<option value="__new">（新しい釣り場を追加…）</option></select>
+      <button class="btn sub sm" style="flex:0 0 auto" id="addPlace">＋釣り場</button>
+    </div>
+  </div>
+
+  <div class="card" id="st2">${H(2,'だれと行った？','任意')}
+    <div class="hint">${esc(db.me)}（自分）は最初から入っています。一緒に行った人がいれば選んで追加してください。</div>
+    <div class="chips" id="memChips" style="margin-bottom:8px">
+      ${orderMembers(t).map(p=>`<span class="chip on" data-mem="${esc(p)}">${esc(p)}${p===db.me?'':'<span class="x">✕</span>'}</span>`).join('')}
+    </div>
+    <select id="memSel">
+      <option value="">＋ 一緒に行った人を追加</option>
+      ${allPeople.filter(p=>!t.members.includes(p)).map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('')}
+      <option value="__new">（新しい人を登録…）</option>
+    </select>
+    <details class="seatbox"${anySeat?' open':''}><summary>🪑 釣座を入れる（任意）</summary>
+      <div class="muted" style="margin:8px 0 6px">イカダ名と番号・方位。1人目のイカダ名は他の人にも自動で入ります。</div>
+      <datalist id="raftList">${[...new Set(db.trips.flatMap(x=>Object.values(x.rafts||{})).filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('')}</datalist>
+      ${orderMembers(t).map(p=>`<div style="margin-bottom:10px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px">${esc(p)}</div>
+        <div class="row">
+          <input data-raft="${esc(p)}" list="raftList" value="${esc((t.rafts||{})[p]||'')}" placeholder="イカダ名 例：紀州A">
+          <input data-seat="${esc(p)}" value="${esc(seatPos(t,p))}" placeholder="番号・方位">
+        </div></div>`).join('')}
+    </details>
+  </div>
+
+  <div class="card" id="st3">${H(3,'釣果','')}<div id="catchArea"></div></div>
+
+  <div class="card" id="st4">${H(4,'当たりエサ・メモ','任意')}
+    <div class="hint">当たったエサをタップ（複数OK）。もう一度タップで外れます。</div>
+    <div class="chips">
+      ${[...new Set([...db.baits, ...t.baits])].map(b=>`<span class="chip${t.baits.includes(b)?' on':''}" data-bait="${esc(b)}">${esc(b)}</span>`).join('')}
+      <span class="chip" id="addBait">＋ エサを追加</span>
+    </div>
+    <label>メモ</label><textarea data-f="memo" placeholder="時合い、タナ、放流のタイミング、反省点など">${esc(t.memo)}</textarea>
+  </div>
+
+  <div class="card" id="st5">${H(5,'釣果の写真','任意')}<div id="photoArea"></div>
+    <input type="file" id="photoIn" accept="image/*" multiple style="display:none"></div>
+
+  <div class="card" id="st6">${H(6,'潮・水温・天気','自動＋任意')}
+    <div class="hint">潮の名前と満潮・干潮は、日付と釣り場から<b>自動</b>で入ります。水温・天気はわかる分だけでOK。</div>
+    <label>潮（自動・変更可）</label><select data-f="tide">${opts(['',...TIDES], t.tide)}</select>
+    <label>満潮・干潮（自動計算）</label>
+    <div class="row" style="align-items:center"><div id="tideTimes" style="font-size:14px;line-height:1.5">${t.tideTimes?esc(tideTimesStr(t.tideTimes)):'<span class="muted">—</span>'}</div>
+      <button class="btn sub sm" style="flex:0 0 auto" id="tideBtn">🌊 再計算</button></div>
+    <div id="tideChart" style="margin-top:8px">${tideChartSVG(t,{w:600,h:260,fs:17})}</div>
+    <label>水温（℃）</label><input type="number" step="0.1" inputmode="decimal" data-f="waterTemp" value="${esc(t.waterTemp)}">
+    <label>天気</label><select data-f="weather">${opts(WEATHER, t.weather)}</select>
+    <div class="row">
+      <div><label>風向き</label><select data-w="windDir">${opts(WIND_DIR, windParts(t)[0])}</select></div>
+      <div><label>風の強さ</label><select data-w="windPow">${opts(WIND_POW, windParts(t)[1])}</select></div>
+    </div>
+  </div>
+
+  <div class="sticky-save">
+    <div class="mini" id="saveMini"></div>
+    <button class="btn acc" id="saveTrip">💾 保存する</button>
+    ${t.isNew?'':'<button class="btn ng" id="delTrip" style="flex:0 0 auto">削除</button>'}
+  </div>`;
+  document.querySelectorAll('.stepnav a').forEach(a=>a.onclick=e=>{ e.preventDefault(); const el=document.querySelector(a.getAttribute('href')); if(el) el.scrollIntoView({behavior:'smooth'}); });
+
+  document.querySelectorAll('[data-f]').forEach(el=>{
+    const ev = el.tagName==='SELECT' ? 'change' : 'input';
+    el.addEventListener(ev, ()=>{
+      const f = el.dataset.f;
+      if(f==='place' && el.value==='__new'){ el.value=t.place||''; $('#addPlace').click(); return; }
+      t[f] = el.value;
+      if(f==='tide') t.tideAuto = false;
+      if(f==='date'){ if(t.tideAuto!==false || !t.tide){ t.tide = tideName(el.value); t.tideAuto = true; } renderEditKeepScroll(); fetchTide(t); }
+      if(f==='place') fetchTide(t);
+      if(f==='start'||f==='end') updateTideChart(t);
+    });
+  });
+  document.querySelectorAll('[data-w]').forEach(el=>el.onchange=()=>{
+    const [d,p]=windParts(t); t.windDir=d; t.windPow=p; t[el.dataset.w]=el.value;
+    t.wind=[t.windDir,t.windPow].filter(Boolean).join(' ');
+  });
+  $('#tideBtn').onclick = ()=>fetchTide(t, true);
+  if(!t.tideTimes) fetchTide(t);
+  $('#addPlace').onclick = ()=> ask('釣り場を追加', '例：釣り堀紀州、みはま釣り堀', v=>{
+    if(!db.places.includes(v)) db.places.push(v); t.place=v; save(); renderEditKeepScroll(); fetchTide(t);
+  });
+  document.querySelectorAll('[data-mem]').forEach(el=>el.onclick=()=>{
+    const p = el.dataset.mem;
+    if(p===db.me){ toast('自分は外せません'); return; }
+    if(t.members.includes(p)){
+      if(personTotal(t,p)>0){ toast(`${p}さんの釣果が入っています。先に釣果を0にしてください`); return; }
+      t.members = t.members.filter(x=>x!==p);
+    }
+    if(!t.members.includes(curPerson)) curPerson = t.members[0];
+    renderEditKeepScroll();
+  });
+  $('#memSel').onchange = e=>{
+    const v=e.target.value; if(!v) return;
+    if(v==='__new'){ e.target.value=''; ask('仲間を追加', '名前（ニックネームでもOK）', n=>{
+      if(n!==db.me && !db.people.includes(n)) db.people.push(n);
+      if(!t.members.includes(n)) t.members.push(n);
+      save(); renderEditKeepScroll(); }); return; }
+    if(!t.members.includes(v)) t.members.push(v);
+    renderEditKeepScroll();
+  };
+  document.querySelectorAll('[data-bait]').forEach(el=>el.onclick=()=>{
+    const b=el.dataset.bait; t.baits = t.baits.includes(b) ? t.baits.filter(x=>x!==b) : [...t.baits, b];
+    el.classList.toggle('on', t.baits.includes(b));
+  });
+  $('#addBait').onclick = ()=> ask('エサを追加', '例：カツオの切り身、生ミック', v=>{
+    if(!db.baits.includes(v)) db.baits.push(v); if(!t.baits.includes(v)) t.baits.push(v); save(); renderEditKeepScroll();
+  });
+  document.querySelectorAll('[data-seat]').forEach(el=>el.oninput=()=>{ (t.seats=t.seats||{})[el.dataset.seat]=el.value; if(el.dataset.seat===db.me) t.ikada=''; });
+  document.querySelectorAll('[data-raft]').forEach(el=>{
+    el.oninput=()=>{ (t.rafts=t.rafts||{})[el.dataset.raft]=el.value; };
+    el.onchange=()=>{ // 同じイカダのことが多いので、空欄の人にも同じイカダ名を入れる
+      if(!el.value) return;
+      document.querySelectorAll('[data-raft]').forEach(o=>{ if(o!==el && !o.value){ o.value=el.value; t.rafts[o.dataset.raft]=el.value; } });
+    };
+  });
+  $('#saveTrip').onclick = saveDraft;
+  if($('#delTrip')) $('#delTrip').onclick = e=>{
+    if(!delArm){ delArm=true; e.target.textContent='もう一度押すと削除'; return; }
+    const old=db.trips.find(x=>x.id===t.id); ((old&&old.photos)||[]).forEach(photoDel);
+    db.trips = db.trips.filter(x=>x.id!==t.id); (db.deleted=db.deleted||{})[t.id]=Date.now(); save(); draft=null; toast('削除しました'); go('print');
+  };
+  renderCatch(); renderPhotoArea();
+}
+function renderEditKeepScroll(){ const y=window.scrollY; renderEdit(); window.scrollTo(0,y); }
+
+function renderPhotoArea(){
+  const t=draft; t.photos=t.photos||[];
+  const area=$('#photoArea');
+  area.innerHTML = `<div class="photos">${t.photos.map(id=>`<div class="ph"><img data-pid="${id}" data-view="${id}"><button data-delph="${id}">✕</button></div>`).join('')}</div>
+    <button class="btn sub" style="margin-top:8px" id="addPhoto">📷 写真を追加</button>
+    <div class="muted" style="margin-top:6px">カメラで撮るか、ギャラリーから選べます（複数可）。写真はこのスマホ内に小さくして保存されます。</div>`;
+  fillPhotos(area);
+  $('#addPhoto').onclick=()=>$('#photoIn').click();
+  area.querySelectorAll('[data-view]').forEach(el=>el.onclick=()=>showPhoto(el.dataset.view));
+  area.querySelectorAll('[data-delph]').forEach(el=>el.onclick=()=>{
+    if(el.dataset.arm!=='1'){ el.dataset.arm='1'; el.textContent='削除'; el.style.width='auto'; el.style.borderRadius='6px'; el.style.padding='0 6px'; el.style.background='#c0392b'; return; }
+    t.photos=t.photos.filter(x=>x!==el.dataset.delph); renderPhotoArea();
+  });
+  $('#photoIn').onchange=async e=>{
+    const files=[...e.target.files]; e.target.value=''; if(!files.length) return;
+    toast('写真を取り込み中…');
+    for(const f of files){
+      try{ const data=await shrinkImage(f); const id='ph_'+uid(); await photoPut(id,data); t.photos.push(id); }
+      catch(err){ toast('写真を保存できませんでした'); }
+    }
+    renderPhotoArea(); toast(`${files.length}枚追加しました（保存ボタンで確定）`);
+  };
+}
+
+function renderCatch(){
+  const t = draft;
+  if(!t.members.length) t.members=[db.me];
+  if(!t.members.includes(curPerson)) curPerson = t.members[0];
+  const c = (t.counts[curPerson] = t.counts[curPerson] || {});
+  const fishList = [...new Set([...db.fish, ...Object.keys(c)])];
+  const sum = p => personTotal(t,p);
+  const area = $('#catchArea');
+  const myN = sum(db.me), lv = moodLv(myN), bump = lastLv!==null && lastLv!==lv; lastLv = lv;
+  area.innerHTML = `
+    <div class="mood"><div class="${bump?'bounce':''}">${charaSVG(db.chara,lv,96)}</div>
+      <div><div class="muted">${esc(db.me)}の釣果</div><div class="n">${myN}<small> 匹</small></div><div class="m">${MOODS[lv].msg}</div></div></div>
+    <div class="hint">魚の <b>＋</b> をタップして数を入れます。${t.members.length>1?`まず${esc(db.me)}の分を入れてから、仲間の分は下の名前をタップして切り替えて入力。`:''}ボウズなら何も押さずに次へ。</div>
+    ${t.members.length>1?`<div class="muted" style="margin-bottom:4px">いま入力しているのは：</div>
+    <div class="who">
+      ${orderMembers(t).map(p=>`<span class="chip${p===curPerson?' on':''}" data-who="${esc(p)}">${p===db.me?'👤 ':''}${esc(p)} ${sum(p)}匹</span>`).join('')}
+    </div>`:''}
+    <div class="tiles">
+      ${fishList.map(f=>{ const n=+c[f]||0; return `<div class="tile${n?' has':''}">
+        <button class="pm" data-minus="${esc(f)}">−</button>
+        <div style="text-align:center;flex:1"><div class="nm">${esc(f)}</div><div class="ct">${n}</div></div>
+        <button class="pm plus" data-plus="${esc(f)}">＋</button></div>`; }).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn sub sm" id="addFish">＋ 魚種を追加</button>
+    </div>
+    <div style="margin-top:12px" class="muted">${t.members.length>1?'全員の':'この釣行の'}合計：<b style="color:var(--acc);font-size:18px">${tripTotal(t)}</b> 匹
+      ${Object.entries(tripFishTotals(t)).map(([f,n])=>`／${esc(f)} ${n}`).join('')}</div>`;
+
+  area.querySelectorAll('[data-who]').forEach(el=>el.onclick=()=>{ curPerson=el.dataset.who; renderCatch(); });
+  area.querySelectorAll('[data-plus]').forEach(el=>el.onclick=()=>{ const f=el.dataset.plus; c[f]=(+c[f]||0)+1; renderCatch(); });
+  area.querySelectorAll('[data-minus]').forEach(el=>el.onclick=()=>{ const f=el.dataset.minus; c[f]=Math.max(0,(+c[f]||0)-1); if(!c[f]) delete c[f]; renderCatch(); });
+  $('#addFish').onclick = ()=> ask('魚種を追加', '例：マダイ、ヒラメ、カワハギ', v=>{ if(!db.fish.includes(v)) db.fish.push(v); save(); renderCatch(); });
+  const mini=$('#saveMini'); if(mini) mini.innerHTML = charaSVG(db.chara,lv,40)+myN+'匹';
+}
+
+function saveDraft(){
+  const t = draft;
+  if(!t.date){ toast('日付を入れてください'); return; }
+  for(const p in t.counts){ if(!t.members.includes(p) || !Object.keys(t.counts[p]).length) delete t.counts[p]; }
+  const rec = Object.assign({}, t); delete rec.isNew; rec.updatedAt = Date.now();
+  const i = db.trips.findIndex(x=>x.id===rec.id);
+  if(i>=0){ (db.trips[i].photos||[]).filter(id=>!(rec.photos||[]).includes(id)).forEach(photoDel); db.trips[i]=rec; } else db.trips.push(rec);
+  if(rec.place && !db.places.includes(rec.place)) db.places.push(rec.place);
+  save(); draft=null; go('print');
+  if(tripMembers(rec).includes(db.me)) showReaction(personTotal(rec, db.me)); else toast('保存しました');
+}
+
+async function doPrint(){ await Promise.all([...document.querySelectorAll('img[data-pid]')].map(async im=>{ if(!im.src){ const v=await photoGet(im.dataset.pid); if(v) im.src=v; } if(!im.complete) await new Promise(r=>{im.onload=im.onerror=r;}); })); try{ window.print(); }catch(e){ toast('ブラウザのメニューから印刷してください'); } }
+$('#hdrPrint').onclick=()=>{ if(view!=='print'){ go('print'); setTimeout(doPrint, 400); } else doPrint(); };
+/* ---------- 印刷用（釣果表の見本に合わせた形） ---------- */
+function fishStr(c){ return Object.entries(c||{}).filter(([,n])=>+n>0).sort((a,b)=>b[1]-a[1]).map(([f,n])=>`${esc(f)} ${n}`).join('、'); }
+function yearLabel(y){ // 例：令和8年（2026年）
+  const e = y>=2020 ? `令和${y-2018}年` : y===2019 ? '平成31年・令和元年' : y>=1989 ? `平成${y-1988===1?'元':y-1988}年` : `昭和${y-1925}年`;
+  return `${e}（${y}年）`;
+}
+function eraLabel(ds){ return dotDate(ds).split('.')[0]; } // 例：R8、H29
+function dotDate(ds){ // 和暦の頭文字で表示：R8.10.31
+  const [y,m,d]=ds.split('-').map(Number), v=y*10000+m*100+d;
+  const era = v>=20190501 ? ['R',y-2018] : v>=19890108 ? ['H',y-1988] : v>=19261225 ? ['S',y-1925] : ['',y];
+  return `${era[0]}${era[1]}.${m}.${d}`;
+}
+function runningAvg(t){ // 同じ年・同じ釣堀で、この釣行までの自分の総数 ÷ 釣行回数
+  const y=(t.date||'').slice(0,4);
+  const same=db.trips.filter(x=>(x.date||'').slice(0,4)===y && (x.place||'')===(t.place||'') && (x.date+(x.start||''))<=(t.date+(t.start||'')) && tripMembers(x).includes(db.me));
+  if(!same.length) return null;
+  return same.reduce((a,x)=>a+personTotal(x,db.me),0)/same.length;
+}
+const n0 = v => v ? v : '';
+// 印刷の表：枠からはみ出す文字は、改行せずに文字を小さくして1行に収める
+function fitPrintText(){
+  document.querySelectorAll('.pblock th, .pblock td, .ptl').forEach(el=>{
+    el.style.fontSize='';
+    let fs=parseFloat(getComputedStyle(el).fontSize), n=0;
+    while(el.scrollWidth > el.clientWidth+1 && fs > 6 && n++ < 40){ fs -= 0.5; el.style.fontSize = fs+'px'; }
+  });
+}
+const round1 = v => (Math.round(v*10)/10).toFixed(1); // 小数点以下2桁目を四捨五入
+function lastTripCard(){
+  const last = db.trips.filter(t=>t.date && tripMembers(t).includes(db.me))
+    .sort((a,b)=>(b.date+(b.updatedAt||0)).localeCompare(a.date+(a.updatedAt||0)))[0];
+  if(!last) return `<div class="mood">${charaSVG(db.chara,2,84)}<div><div class="m">まだ記録がないよ～</div>
+    <div class="muted" style="margin-top:4px">「➕ 新規記録」から最初の釣行を記録しよう！</div></div></div>`;
+  const n = personTotal(last, db.me), lv = moodLv(n);
+  const [, m, d] = last.date.split('-').map(Number);
+  const msg = [`前回はボウズだったよ～（泣）`, `前回は${n}匹…渋かったよ～`, `前回は${n}匹、まずまずだったよ～`, `前回は${n}匹、いい釣りだったよ～♪`, `前回は${n}匹の爆釣だったよ～！`][lv];
+  const sub = ['次こそリベンジだ！', '次はもっと釣るぞ！', 'この調子でいこう！', '次も期待しちゃう！', 'またあの釣り場へ行こう！'][lv];
+  return `<div class="mood" style="cursor:pointer" data-last="${last.id}">${charaSVG(db.chara,lv,84)}<div style="flex:1">
+    <div class="muted">${m}/${d}（${wday(last.date)}）${esc(last.place||'')}</div>
+    <div class="m">${esc(msg)}</div><div class="muted" style="margin-top:2px">${sub}</div></div></div>`;
+}
+function renderPrint(){
+  // 印刷する人（filt.ppl が null なら全員）
+  const base = filtered();
+  const people = [...new Set(base.flatMap(t=>orderMembers(t)))].sort((a,b)=>(a===db.me?-1:b===db.me?1:0));
+  let sel = Array.isArray(filt.ppl) ? filt.ppl.filter(p=>people.includes(p)) : null;
+  if(sel && !sel.length) sel = null;
+  const showM = t => orderMembers(t).filter(p=>!sel || sel.includes(p));
+  const shownFish = t => { const r={}; for(const p of showM(t)) for(const [f,n] of Object.entries((t.counts||{})[p]||{})) if(+n) r[f]=(r[f]||0)+(+n); return r; };
+  const shownTotal = t => showM(t).reduce((a,p)=>a+personTotal(t,p),0);
+  const trips = base.filter(t=>showM(t).length).sort((a,b)=>(b.date+(b.start||'')).localeCompare(a.date+(a.start||'')));
+  const cond = (filt.year==='all'?'全期間':filt.year+'年') + '　' + (filt.place==='all'?'全釣り場':filt.place) + (sel ? '　／　' + sel.join('・') : '');
+  const meShown = !sel || sel.includes(db.me);
+  const meTrips = trips.filter(t=>tripMembers(t).includes(db.me));
+  const mineTotal = meTrips.reduce((a,t)=>a+personTotal(t,db.me),0);
+  // 魚種の列：印刷する人が釣った魚（魚種一覧の順）
+  const caught=new Set(); trips.forEach(t=>Object.keys(shownFish(t)).forEach(f=>caught.add(f)));
+  let cols=[...db.fish.filter(f=>caught.has(f)), ...[...caught].filter(f=>!db.fish.includes(f))];
+  if(!cols.length) cols=db.fish.slice(0,8);
+  const blockArr = trips.map(t=>{
+    const y=+(t.date||'0').slice(0,4), ra=runningAvg(t), ms=showM(t), ft=shownFish(t), tot=shownTotal(t);
+    const has = v => v!=='' && v!=null;
+    const temps = [has(t.waterTemp)?'水温 '+t.waterTemp+'℃':''].filter(Boolean).join('・');
+    const head2 = '';
+    const tideTxt = [t.tide||'', t.tideTimes?tideTimesStr(t.tideTimes,true).replace('満 ','満潮 ').replace(' / 干 ','　干潮 '):''].filter(Boolean).join('／');
+    const baitTxt = (t.baits||[]).join('・');
+    return `<table class="ptable pblock" data-trip="${t.id}">
+      <tr class="pp"><th colspan="${cols.length+4}">📍 ${esc(t.place||'（釣り場未設定）')}${ms.includes(db.me)?(()=>{ const myn=personTotal(t,db.me); return `<span class="mybadge">${charaSVG(db.chara,moodLv(myn),26)}${esc(db.me)} <b>${myn}</b>匹</span>`; })():''}${temps?`<span style="font-weight:400">（${esc(temps)}）</span>`:''}${baitTxt?`<span class="pinfo">🦐 当たりエサ：${esc(baitTxt)}</span>`:''}${t.memo?`<span class="pinfo">💬 ${esc(t.memo)}</span>`:''}${tideTxt?`<span class="pinfo ptd">🌊 ${esc(tideTxt)}</span>`:''}</th></tr>
+      <tr class="ph"><th class="c0">${esc(dotDate(t.date))}<span class="sm">（${wday(t.date)}）</span></th><th class="c1">釣座</th>
+        ${cols.map(f=>`<th class="cf">${esc(f)}</th>`).join('')}<th class="cf">計</th><th class="ca">${eraLabel(t.date)} 平均</th></tr>
+      ${ms.map(p=>{ const c=(t.counts||{})[p]||{}, pt=personTotal(t,p), me=p===db.me; return `<tr${me?' class="me"':''}>
+        <td class="c0">${me?'👤 ':''}${esc(p)}</td><td class="c1">${esc(seatOf(t,p))}</td>
+        ${cols.map(f=>`<td class="cf">${n0(+c[f]||0)}</td>`).join('')}<td class="cf"><b>${pt}</b></td>
+        <td class="ca">${me&&ra!=null?`<b>${round1(ra)}</b>`:''}</td></tr>`; }).join('')}
+      <tr class="pf"><td class="c0">合計</td><td class="c1"></td>
+        ${cols.map(f=>`<td class="cf">${n0(ft[f]||0)}</td>`).join('')}<td class="cf"><b>${tot}</b></td>
+        <td class="ca"></td></tr>
+    </table>${t.tideTimes?`<div class="ptide"><div class="ptl">${esc(tideTimesStr(t.tideTimes))}</div>${filt.pchart!==false?`<div style="margin-top:3px">${tideChartSVG(t,{w:1000,h:150,fs:12})}</div>`:''}</div>`:''}${filt.pphoto!==false && (t.photos||[]).length?`<div class="pphotos">${t.photos.map(id=>`<img data-pid="${id}">`).join('')}</div>`:''}`; });
+  // 年ごとにまとめて、色分けした見出しを付ける
+  const YC = ['#0b4f6c','#b5542b','#2e7d4f','#6b4fa0','#9a7b12'];
+  let blocks='', curY=null, yi=-1;
+  trips.forEach((t,i)=>{
+    const y=(t.date||'').slice(0,4);
+    if(y!==curY){
+      if(curY!==null) blocks+='</div>';
+      curY=y; yi++;
+      const yt=trips.filter(x=>(x.date||'').slice(0,4)===y), myT=yt.filter(x=>tripMembers(x).includes(db.me)), myN=myT.reduce((a,x)=>a+personTotal(x,db.me),0);
+      blocks+=`<div class="pyr" style="--yc:${YC[yi%YC.length]}"><div class="pyear">${esc(yearLabel(+y))}<span>釣行 ${yt.length}回${meShown&&myT.length?`　${esc(db.me)} ${myN}匹　平均 ${round1(myN/myT.length)}匹/回`:''}</span></div>`;
+    }
+    blocks+=blockArr[i];
+  });
+  if(curY!==null) blocks+='</div>';
+  let h = `<div class="no-print">${lastTripCard()}<button class="btn acc wide" id="pNew" style="font-size:17px;padding:14px;margin-bottom:12px">➕ 新規記録</button>
+    ${draftDirty()?`<div class="warn" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:160px">✏️ 入力途中の記録があります（${esc(draft.date||'')} ${esc(draft.place||'')}）</div>
+      <button class="btn sm" id="dResume">続きを入力</button><button class="btn sub sm" id="dDrop">破棄</button></div>`:''}
+    ${filterBar()}</div>
+  <div class="card rcard">
+    <div class="ptitle">釣りログ君 釣果記録</div>
+    <div class="muted pcond" style="margin-bottom:8px">${esc(cond)}　／　釣行 ${trips.length}回${meShown&&meTrips.length?`　${esc(db.me)}の総数 ${mineTotal}匹　平均 ${round1(mineTotal/meTrips.length)}匹/回`:''}</div>
+    <div class="rhead no-print"><div class="rt">🎣 釣果記録</div><div class="rc">${esc(cond)}${blocks?'　／　表をタップするとその釣行を直せます':''}</div>
+      <div class="rstat"><div><b>${trips.length}</b><span>釣行（回）</span></div>${meTrips.length?`<div><b>${mineTotal}</b><span>${esc(db.me)}の総数</span></div><div><b>${round1(mineTotal/meTrips.length)}</b><span>平均（匹/回）</span></div>`:''}</div></div>
+    ${blocks ? `<div class="pwrap"><div class="pinner">${blocks}</div></div>` : (db.trips.length ? '<div class="empty">条件に合う記録がありません</div>' : '<div class="empty">まだ記録がありません。<br>上の「➕ 新規記録」から記録できます。<br><br><button class="btn sub" id="pLoad">📂 保存したデータを読み込む</button></div>')}
+    <div class="muted" style="margin-top:6px">「R8 平均」など平均の欄：${esc(db.me)}の行＝同じ年・同じ釣堀でのその日までの${esc(db.me)}の総数÷釣行回数</div>
+    <div class="muted no-print" style="margin-top:4px">← 表は横にスクロールできます</div>
+  </div>
+  <div class="card no-print"><h2>🖨 印刷</h2>
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:0 0 10px"><input type="checkbox" id="pPhoto" style="width:auto"${filt.pphoto!==false?' checked':''}> 写真も印刷する</label>
+    <div style="margin:0 0 10px"><div class="muted" style="margin-bottom:4px">印刷する人（タップで選択・複数OK）</div>
+      <div class="chips"><span class="chip${sel?'':' on'}" data-ppl="__all">全員</span><span class="chip" data-ppl="__me">${esc(db.me)}だけ</span>
+      ${people.map(p=>`<span class="chip${sel&&sel.includes(p)?' on':''}" data-ppl="${esc(p)}">${esc(p)}</span>`).join('')}</div></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:0 0 10px"><input type="checkbox" id="pChart" style="width:auto"${filt.pchart!==false?' checked':''}> 潮見表（潮位グラフ）も印刷する</label>
+    <button class="btn wide" id="pPrint">🖨 印刷する</button>
+    <div class="muted" style="margin-top:8px">印刷できない場合は、ブラウザのメニュー（Chromeなら「︙」→「共有」→「印刷」）から印刷してください。</div>
+  </div>
+  <div class="card no-print"><h2>💾 データの保存・読み込み</h2>
+    <div class="row"><button class="btn" id="pSave">💾 保存する</button><button class="btn sub" id="pLoad2">📂 読み込む</button></div>
+    <div class="muted" style="margin-top:8px;text-align:center">${lastSavedText()}</div>
+  </div>
+  <div class="no-print" style="text-align:right;margin:0 0 10px"><button class="btn ng sm" id="pWipe">🗑 全て削除</button></div>`;
+  $('#app').innerHTML = h; bindFilter();
+  fillPhotos();
+  requestAnimationFrame(fitPrintText);
+  $('#pPhoto').onchange=e=>{ filt.pphoto=e.target.checked; render(); };
+  $('#pChart').onchange=e=>{ filt.pchart=e.target.checked; render(); };
+  document.querySelectorAll('[data-ppl]').forEach(el=>el.onclick=()=>{
+    const v=el.dataset.ppl;
+    if(v==='__all') filt.ppl=null;
+    else if(v==='__me') filt.ppl=[db.me];
+    else { const cur = sel ? sel.slice() : []; filt.ppl = cur.includes(v) ? cur.filter(x=>x!==v) : [...cur, v]; if(!filt.ppl.length) filt.ppl=null; }
+    render();
+  });
+  $('#pWipe').onclick=confirmWipe;
+  $('#pNew').onclick=startNew;
+  $('#pSave').onclick=saveDataFile; $('#pLoad2').onclick=pickDataFile;
+  document.querySelectorAll('[data-last]').forEach(el=>el.onclick=()=>openTrip(el.dataset.last));
+  if($('#dResume')) $('#dResume').onclick=()=>go('edit');
+  if($('#dDrop')) $('#dDrop').onclick=e=>{ if(e.target.dataset.arm!=='1'){ e.target.dataset.arm='1'; e.target.textContent='もう一度押すと破棄'; return; } draft=null; render(); };
+  if($('#pLoad')) $('#pLoad').onclick=pickDataFile;
+  document.querySelectorAll('[data-trip]').forEach(el=>el.onclick=()=>openTrip(el.dataset.trip));
+  $('#pPrint').onclick=doPrint;
+}
+
+/* ---------- 集計 ---------- */
+function groupTable(title, keyFn, order){
+  const g = {};
+  for(const t of filtered()){
+    for(const k of [].concat(keyFn(t))){ if(k==null || k==='') continue;
+    const o = g[k] = g[k] || {trips:0, fish:0, rods:0, mine:0};
+    o.trips++; o.fish += tripTotal(t); o.rods += tripMembers(t).length; o.mine += personTotal(t, db.me); }
+  }
+  let keys = Object.keys(g);
+  keys = order ? order.filter(k=>g[k]).concat(keys.filter(k=>!order.includes(k))) : keys.sort();
+  title += `（${esc(db.me)}）`;
+  if(!keys.length) return `<div class="card"><h2>${title}</h2><div class="muted">データがありません</div></div>`;
+  const max = Math.max(...keys.map(k=>g[k].mine/g[k].trips));
+  return `<div class="card"><h2>${title}</h2><table>
+    <tr><th></th><th class="n">釣行</th><th class="n">総数</th><th class="n">平均/回</th><th style="width:35%"></th></tr>
+    ${keys.map(k=>{ const o=g[k], avg=o.mine/o.trips; return `<tr><td>${esc(k)}</td><td class="n">${o.trips}</td><td class="n">${o.mine}</td><td class="n"><b style="color:var(--acc)">${round1(avg)}</b></td>
+      <td><div class="bar" style="width:${max?avg/max*100:0}%"></div></td></tr>`; }).join('')}
+  </table></div>`;
+}
+function tempBand(v){
+  if(v===''||v==null||isNaN(+v)) return null;
+  const x=+v; if(x<14) return '〜14℃'; if(x>=26) return '26℃〜';
+  const lo = Math.floor(x/2)*2; return `${lo}〜${lo+2}℃`;
+}
+function renderStats(){
+  const trips = filtered();
+  let h = filterBar();
+  if(!trips.length){ $('#app').innerHTML = h + '<div class="card empty">集計する記録がありません</div>'; bindFilter(); return; }
+  // 魚種別
+  const all={}, mine={};
+  for(const t of trips){
+    for(const [f,n] of Object.entries(tripFishTotals(t))) all[f]=(all[f]||0)+n;
+    for(const [f,n] of Object.entries((t.counts||{})[db.me]||{})) mine[f]=(mine[f]||0)+(+n||0);
+  }
+  const fk = Object.keys(mine).filter(f=>mine[f]>0).sort((a,b)=>mine[b]-mine[a]); const fmax = Math.max(1,...Object.values(mine));
+  const totalAll = Object.values(all).reduce((a,b)=>a+b,0), totalMine = Object.values(mine).reduce((a,b)=>a+b,0);
+  h += `<div class="card"><h2>まとめ（${esc(db.me)}）</h2><div class="row" style="text-align:center">
+    <div><div class="muted">釣行</div><div class="big">${trips.length}</div></div>
+    
+    <div><div class="muted">${esc(db.me)}の総数</div><div class="big">${totalMine}</div></div>
+    <div><div class="muted">平均/回</div><div class="big">${round1(totalMine/trips.length)}</div></div></div>
+    <div class="muted" style="margin-top:6px;text-align:center">${esc(db.me)}の釣果だけで計算しています（仲間の分は「仲間別（全員）」に表示）</div></div>`;
+  h += `<div class="card"><h2>魚種別（${esc(db.me)}）</h2>${fk.length?`<table><tr><th>魚種</th><th class="n">匹数</th><th style="width:50%"></th></tr>
+    ${fk.map(f=>`<tr><td>${esc(f)}</td><td class="n">${mine[f]}</td><td><div class="bar" style="width:${mine[f]/fmax*100}%"></div></td></tr>`).join('')}</table>`:`<div class="muted">${esc(db.me)}の釣果はまだありません</div>`}</div>`;
+  // 人別
+  const per={}, perTrips={};
+  for(const t of trips){ for(const p of tripMembers(t)){ perTrips[p]=(perTrips[p]||0)+1; per[p]=(per[p]||0)+personTotal(t,p); } }
+  const pk = Object.keys(per).sort((a,b)=>per[b]-per[a]);
+  h += `<div class="card"><h2>仲間別（全員）</h2><table><tr><th>名前</th><th class="n">参加</th><th class="n">釣果</th><th class="n">1回平均</th><th>よく釣る魚</th></tr>
+    ${pk.map(p=>{ const fs={}; for(const t of trips){ for(const [f,n] of Object.entries((t.counts||{})[p]||{})) fs[f]=(fs[f]||0)+(+n||0); }
+      const top=Object.entries(fs).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([f,n])=>`${esc(f)}${n}`).join('・');
+      const my = p===db.me?' my':''; return `<tr><td>${esc(p)}</td><td class="n">${perTrips[p]}</td><td class="n${my}">${per[p]}</td><td class="n${my}">${round1(per[p]/perTrips[p])}</td><td class="muted">${top}</td></tr>`; }).join('')}</table></div>`;
+  // 年×釣り場の平均釣れ高（総数 ÷ 釣行回数）
+  const yp={};
+  for(const t of trips){ const k=(t.date||'').slice(0,4)+'|'+(t.place||'（未設定）');
+    const o=yp[k]=yp[k]||{trips:0,fish:0,mine:0}; o.trips++; o.fish+=tripTotal(t); o.mine+=personTotal(t,db.me); }
+  const pIdx = p => { const i=db.places.indexOf(p); return i<0?999:i; };
+  const ypk=Object.keys(yp).sort((a,b)=>{ const [ya,pa]=a.split('|'), [yb,pb]=b.split('|'); return yb.localeCompare(ya) || pIdx(pa)-pIdx(pb) || pa.localeCompare(pb); });
+  h += `<div class="card"><h2>年・釣り場別の平均釣れ高（${esc(db.me)}）</h2>
+    <div class="muted" style="margin-bottom:6px">平均 ＝ その年・その釣堀での${esc(db.me)}の総数 ÷ 釣行回数</div>
+    <table><tr><th>年</th><th>釣り場</th><th class="n">釣行</th><th class="n">総数</th><th class="n">平均/回</th></tr>
+    ${ypk.map((k,i)=>{ const [y,pl]=k.split('|'), o=yp[k]; const nb = i>0 && ypk[i-1].split('|')[0]!==y; return `<tr${nb?' class="ysep"':''}><td>${y}</td><td>${esc(pl)}</td><td class="n">${o.trips}</td><td class="n">${o.mine}</td>
+      <td class="n"><b style="color:var(--acc)">${round1(o.mine/o.trips)}</b></td></tr>`; }).join('')}
+    </table></div>`;
+  h += groupTable('潮別', t=>t.tide, TIDES);
+  h += groupTable('水温別', t=>tempBand(t.waterTemp), ['〜14℃','14〜16℃','16〜18℃','18〜20℃','20〜22℃','22〜24℃','24〜26℃','26℃〜']);
+  h += groupTable('当たりエサ別', t=>t.baits||[], db.baits);
+  h += groupTable('釣り場別', t=>t.place, db.places);
+  h += groupTable('月別', t=>t.date ? +t.date.slice(5,7)+'月' : null, Array.from({length:12},(_,i)=>(i+1)+'月'));
+  $('#app').innerHTML = h; bindFilter();
+}
+
+/* ---------- 設定 ---------- */
+function listEditor(title, key, note){
+  return `<div class="card"><h2>${title}</h2>${note?`<div class="muted" style="margin-bottom:6px">${note}</div>`:''}
+    <div class="chips">${db[key].map((v,i)=>`<span class="chip" data-rm="${key}:${i}">${esc(v)}<span class="x">✕</span></span>`).join('')}
+    <span class="chip" data-add="${key}">＋ 追加</span></div></div>`;
+}
+function renderSettings(){
+  $('#app').innerHTML = `
+  <div class="card"><h2>自分の名前</h2>
+    <div class="row"><input id="meName" value="${esc(db.me)}"><button class="btn sm" style="flex:0 0 auto" id="meSave">変更</button></div>
+    <div class="muted" style="margin-top:6px">過去の記録の名前もまとめて置き換わります。</div></div>
+  <div class="card"><h2>キャラクター</h2>
+    <div style="display:flex;align-items:center;gap:12px">${charaSVG(db.chara,3,72)}
+      <div style="flex:1" class="muted">自分の釣果で表情が変わります</div>
+      <button class="btn sm" style="flex:0 0 auto" id="chChange">変更</button></div></div>
+  ${listEditor('魚種', 'fish', '✕で一覧から外します（過去の記録は消えません）')}
+  ${listEditor('当たりエサ', 'baits')}
+  ${listEditor('釣り場', 'places')}
+  <div class="card"><h2>釣り場ごとの潮位観測地点</h2>
+    <div class="muted" style="margin-bottom:6px">満潮・干潮の時刻をどの観測地点で計算するか（気象庁の潮位表をもとにアプリ内で計算。通信の設定は不要）</div>
+    ${db.places.map(p=>`<div class="row" style="align-items:center;margin-bottom:6px"><div style="font-size:14px">${esc(p)}</div>
+      <select data-stn="${esc(p)}">${STATIONS.map(([c,n])=>`<option value="${c}"${(db.tideStn[p]||'')===c?' selected':''}>${n}</option>`).join('')}</select></div>`).join('')}
+  </div>
+  ${listEditor('仲間', 'people')}
+  <div class="card"><h2>バックアップ・Excel</h2>
+    <div class="muted" style="margin-bottom:8px">データはこの端末のブラウザ内だけに保存されます（他の端末とは自動で同じになりません）。機種変更や別の端末への移動に備えて、ときどき「データを保存」でファイルに書き出してください。</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" id="expJson">💾 データを保存（ファイル）</button>
+      <button class="btn sub" id="impJson">📂 データを読み込む</button>
+      <button class="btn sub" id="expCsv">📄 Excel用CSVを書き出す</button>
+    </div>
+  </div>
+  <div class="card"><h2>全データ削除</h2>
+    <div class="muted" style="margin-bottom:8px">この端末の釣行記録・写真・名前・キャラクター・リストをすべて消して、最初の状態に戻します。元に戻せないので、必要なら先に「データを保存」してください。</div>
+    <button class="btn ng wide" id="wipeAll">🗑 全データを削除する</button>
+  </div>`;
+  $('#chChange').onclick = ()=>charaPicker();
+  $('#meSave').onclick = ()=>{
+    const v = $('#meName').value.trim(); if(!v || v===db.me) return;
+    const old = db.me;
+    for(const t of db.trips){
+      t.members = (t.members||[]).map(p=>p===old?v:p);
+      if(t.counts && t.counts[old]){ t.counts[v]=t.counts[old]; delete t.counts[old]; }
+      (t.details||[]).forEach(d=>{ if(d.person===old) d.person=v; });
+      t.updatedAt = Date.now();
+    }
+    db.people = db.people.filter(p=>p!==v); db.me = v; save(); toast('名前を変更しました'); render();
+  };
+  document.querySelectorAll('[data-stn]').forEach(el=>el.onchange=()=>{ if(el.value) db.tideStn[el.dataset.stn]=el.value; else delete db.tideStn[el.dataset.stn]; save(); toast('観測地点を変更しました'); });
+  document.querySelectorAll('[data-rm]').forEach(el=>el.onclick=()=>{
+    const [k,i] = el.dataset.rm.split(':'); db[k].splice(+i,1); save(); render();
+  });
+  document.querySelectorAll('[data-add]').forEach(el=>el.onclick=()=>{
+    const k = el.dataset.add; const t = {fish:'魚種を追加', baits:'エサを追加', places:'釣り場を追加', people:'仲間を追加'}[k];
+    ask(t, '', v=>{ if(!db[k].includes(v)) db[k].push(v); save(); render(); });
+  });
+  $('#expJson').onclick = saveDataFile;
+  $('#expCsv').onclick = ()=> exportText('Excel用CSV', toCSV(), `釣りログ君_${today()}.csv`, 'text/csv');
+  $('#impJson').onclick = pickDataFile;
+  $('#wipeAll').onclick = confirmWipe;
+}
+function confirmWipe(){
+  const nPh = db.trips.reduce((a,t)=>a+(t.photos||[]).length,0);
+  openModal(`<h2 style="font-size:16px;margin:0 0 6px;color:var(--ng)">🗑 全データを削除</h2>
+    <div style="margin-bottom:10px">釣行 <b>${db.trips.length}件</b>・写真 <b>${nPh}枚</b>、名前・キャラクター・魚種やエサのリストもすべて消えます。<b>元に戻せません。</b></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" id="wpSave">💾 先にデータを保存する</button>
+      <button class="btn ng" id="wpGo">削除する</button>
+      <button class="btn sub" id="wpNo">やめる</button>
+    </div>`);
+  $('#wpNo').onclick=closeModal;
+  $('#wpSave').onclick=()=>{ closeModal(); saveDataFile(); };
+  $('#wpGo').onclick=async e=>{
+    if(e.target.dataset.arm!=='1'){ e.target.dataset.arm='1'; e.target.textContent='本当に削除します（もう一度押す）'; return; }
+    e.target.disabled=true; e.target.textContent='削除中…';
+    try{ localStorage.removeItem(KEY); localStorage.removeItem(META_KEY); }catch(err){}
+    try{ const d=await idb(); await new Promise(r=>{ const tx=d.transaction('p','readwrite'); tx.objectStore('p').clear(); tx.oncomplete=r; tx.onerror=r; }); }catch(err){}
+    for(const k in photoCache) delete photoCache[k];
+    location.reload();
+  };
+}
+
+function toCSV(){
+  const head = ['日付','曜日','釣り場','自分の釣座','潮','満潮','干潮','水温','天気','風','参加人数','名前','イカダ名','番号・方位','魚種','匹数','当たりエサ','メモ'];
+  const rows = [head];
+  for(const t of db.trips.slice().sort((a,b)=>a.date.localeCompare(b.date))){
+    const base = [t.date, wday(t.date), t.place, seatOf(t,db.me), t.tide, ((t.tideTimes||{}).high||[]).map(x=>x.t).join('・'), ((t.tideTimes||{}).low||[]).map(x=>x.t).join('・'), t.waterTemp, t.weather, t.wind, tripMembers(t).length];
+    let any=false;
+    for(const p of tripMembers(t)){
+      const c=(t.counts||{})[p]||{};
+      const ent=Object.entries(c).filter(([,n])=>+n>0);
+      if(!ent.length){ rows.push([...base,p,(t.rafts||{})[p]||'',seatPos(t,p),'',0,(t.baits||[]).join('・'),t.memo]); any=true; continue; }
+      for(const [f,n] of ent){ rows.push([...base,p,(t.rafts||{})[p]||'',seatPos(t,p),f,n,(t.baits||[]).join('・'),t.memo]); any=true; }
+    }
+    if(!any) rows.push([...base,'','','','',0,(t.baits||[]).join('・'),t.memo]);
+  }
+  return rows.map(r=>r.map(v=>{ v=String(v??''); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(',')).join('\r\n');
+}
+
+/* ---------- ダイアログ ---------- */
+function openModal(html){ $('#modalBox').innerHTML = html; $('#modal').classList.add('show'); }
+function closeModal(){ $('#modal').classList.remove('show'); }
+$('#modal').onclick = e=>{ if(e.target.id==='modal') closeModal(); };
+
+function ask(title, ph, cb){
+  openModal(`<h2 style="font-size:16px;margin:0 0 10px">${esc(title)}</h2>
+    <input id="askIn" placeholder="${esc(ph)}">
+    <div class="row" style="margin-top:12px"><button class="btn sub" id="askNo">キャンセル</button><button class="btn" id="askOk">追加</button></div>`);
+  const inp=$('#askIn'); setTimeout(()=>inp.focus(),50);
+  const ok=()=>{ const v=inp.value.trim(); if(!v) return; closeModal(); cb(v); };
+  $('#askOk').onclick=ok; $('#askNo').onclick=closeModal;
+  inp.onkeydown=e=>{ if(e.key==='Enter') ok(); };
+}
+function exportText(title, text, fname, mime){
+  // ファイル保存（GitHub Pages等では動作）。保存できない画面でもコピーで持ち出せるようにする
+  let saved=false;
+  try{
+    const blob = new Blob([mime==='text/csv'?'﻿'+text:text], {type:mime+';charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname;
+    document.body.appendChild(a); a.click(); a.remove(); saved=true;
+  }catch(e){}
+  openModal(`<h2 style="font-size:16px;margin:0 0 6px">${esc(title)}</h2>
+    <div class="muted" style="margin-bottom:8px">${saved?`「${esc(fname)}」の保存を開始しました。保存されない場合は下の「コピー」を使ってメモ帳などに貼り付けてください。`:'下の「コピー」でコピーして、メモ帳などに貼り付けて保存してください。'}</div>
+    <textarea id="expTxt" style="height:180px;font-size:12px" readonly>${esc(text)}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn sub" id="expClose">閉じる</button><button class="btn" id="expCopy">📋 コピー</button></div>`);
+  $('#expClose').onclick=closeModal;
+  $('#expCopy').onclick=async()=>{
+    try{ await navigator.clipboard.writeText(text); toast('コピーしました'); }
+    catch(e){ const ta=$('#expTxt'); ta.select(); toast('選択しました。長押しでコピーしてください'); }
+  };
+}
+/* ---------- データの保存・読み込み（ファイル） ---------- */
+const META_KEY = 'tsuribori-note-share-meta';
+function getMeta(){ try{ return JSON.parse(localStorage.getItem(META_KEY))||{}; }catch(e){ return {}; } }
+function setMeta(m){ try{ localStorage.setItem(META_KEY, JSON.stringify({...getMeta(), ...m})); }catch(e){} }
+function lastSavedText(){
+  const m=getMeta();
+  if(!m.savedAt) return '⚠ まだファイルに保存していません';
+  const d=new Date(m.savedAt);
+  return `最後にファイル保存：${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}` + ((m.changedAt||0)>m.savedAt?'（その後に変更あり）':'');
+}
+function stamp(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`; }
+async function buildDataFile(){
+  const out = JSON.parse(JSON.stringify(db)); out.photoData = {}; out.app='kaijou-tsuribori'; out.savedAt=Date.now();
+  for(const t of db.trips) for(const id of (t.photos||[])){ const v=await photoGet(id); if(v) out.photoData[id]=v; }
+  return JSON.stringify(out);
+}
+async function saveDataFile(){
+  toast('保存するデータを準備中…');
+  const text = await buildDataFile();
+  const fname = `釣りログ君_${stamp()}.json`;
+  const blob = new Blob([text], {type:'application/json'});
+  const file = (()=>{ try{ return new File([blob], fname, {type:'application/json'}); }catch(e){ return null; } })();
+  const canShare = !!(file && navigator.canShare && navigator.canShare({files:[file]}));
+  const nPh = Object.keys(JSON.parse(text).photoData||{}).length;
+  openModal(`<h2 style="font-size:16px;margin:0 0 6px">💾 データを保存</h2>
+    <div class="muted" style="margin-bottom:10px">釣行 ${db.trips.length}件・写真 ${nPh}枚（${(blob.size/1024/1024).toFixed(1)}MB）<br>ファイル名：${esc(fname)}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" id="dfDown">📥 この端末に保存（ダウンロード）</button>
+      ${canShare?'<button class="btn sub" id="dfShare">📤 Googleドライブ・LINEなどに送る</button>':''}
+      <button class="btn sub" id="dfCopy">📋 文字としてコピー（保存できない時）</button>
+      <button class="btn sub" id="dfClose">閉じる</button>
+    </div>
+    <div class="muted" style="margin-top:10px">${canShare?'スマホ⇔パソコンで移すときは「Googleドライブ・LINEなどに送る」が便利です。':'スマホ⇔パソコンで移すときは、保存したファイルをGoogleドライブにアップロードしてください。'}もう一方の端末で「📂 データを読み込む」からそのファイルを選びます。</div>`);
+  const done = ()=>{ setMeta({savedAt:Date.now()}); if(view==='list'||view==='print') render(); };
+  $('#dfDown').onclick=()=>{
+    try{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 60000); done(); toast('ダウンロードフォルダに保存しました'); closeModal(); }
+    catch(e){ toast('この画面では保存できません。コピーを使ってください'); }
+  };
+  if($('#dfShare')) $('#dfShare').onclick=async()=>{
+    try{ await navigator.share({files:[file], title:fname}); done(); closeModal(); }
+    catch(e){ if(e && e.name!=='AbortError') toast('送れませんでした'); }
+  };
+  $('#dfCopy').onclick=async()=>{
+    try{ await navigator.clipboard.writeText(text); done(); toast('コピーしました。メモ帳などに貼り付けて保存してください'); }
+    catch(e){ toast('コピーできませんでした'); }
+  };
+  $('#dfClose').onclick=closeModal;
+}
+function pickDataFile(){
+  const inp=$('#dataFile');
+  inp.onchange=e=>{
+    const f=e.target.files[0]; e.target.value=''; if(!f) return;
+    const r=new FileReader(); r.onload=()=>confirmImport(r.result, f.name); r.onerror=()=>toast('ファイルを読めませんでした'); r.readAsText(f);
+  };
+  inp.click();
+}
+function confirmImport(text, fname){
+  let d; try{ d = JSON.parse(text); if(!Array.isArray(d.trips)) throw 0; }catch(e){ toast('このアプリのデータファイルではありません'); return; }
+  const nPh = Object.keys(d.photoData||{}).length;
+  const when = d.savedAt ? new Date(d.savedAt).toLocaleString('ja-JP') : '不明';
+  openModal(`<h2 style="font-size:16px;margin:0 0 6px">📂 データを読み込む</h2>
+    <div class="muted" style="margin-bottom:10px">${esc(fname||'')}<br>保存日時：${esc(when)}<br>釣行 ${d.trips.length}件・写真 ${nPh}枚</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" id="imMerge">今のデータに合わせる（おすすめ）</button>
+      <div class="muted" style="margin-top:-4px">両方の記録を残します。同じ記録は新しく直した方になります。</div>
+      <button class="btn ng" id="imReplace">今のデータを消して置き換える</button>
+      <div class="muted" style="margin-top:-4px">この端末の記録（${db.trips.length}件）は、読み込むファイルの内容に入れ替わります。</div>
+      <button class="btn sub" id="imNo">やめる</button>
+    </div>`);
+  $('#imNo').onclick=closeModal;
+  $('#imMerge').onclick=()=>doImport(d, false);
+  $('#imReplace').onclick=e=>{
+    if(e.target.dataset.arm!=='1'){ e.target.dataset.arm='1'; e.target.textContent='もう一度押すと置き換えます'; return; }
+    doImport(d, true);
+  };
+}
+async function doImport(raw, replace){
+  const photos = raw.photoData||{};
+  const d = normalize(JSON.parse(JSON.stringify({...raw, photoData:undefined})));
+  for(const t of d.trips) if(!t.id) t.id=uid();
+  if(replace){
+    db = normalize(JSON.parse(JSON.stringify(d)));
+    db.listsAt = Date.now();
+    db.trips.forEach(t=>t.updatedAt=Date.now());
+    db.deleted = {};
+  } else {
+    db = mergeDb(db, d);
+    for(const k of ['fish','baits','places','people']) for(const v of d[k]) if(!db[k].includes(v)) db[k].push(v);
+    db.tideStn = {...(d.tideStn||{}), ...(db.tideStn||{})};
+  }
+  delete db.photoData; delete db.app; delete db.savedAt;
+  toast('写真を取り込み中…');
+  for(const [id,v] of Object.entries(photos)){ try{ await photoPut(id,v); }catch(e){} }
+  save(); closeModal(); toast(`読み込みました（釣行 ${d.trips.length}件）`); go('print');
+}
+
+// インストール（ホーム画面にアプリとして追加）とオフライン用
+lastListsSig = listsSig(db);
+// 起動時は必ずトップ（釣果記録）から
+try{ history.scrollRestoration='manual'; }catch(e){}
+if(location.hash) try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+window.scrollTo(0,0);
+function backToTop(){
+  if(view==='print' && !$('#modal').classList.contains('show')){ window.scrollTo(0,0); return; }
+  closeModal(); go('print');
+}
+// アプリを閉じてしばらくしてから開き直した時も、トップに戻す（入力途中の記録は残す）
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='hidden'){ hiddenAt = Date.now(); return; }
+  if(hiddenAt && Date.now()-hiddenAt > 3*60*1000) backToTop();
+  hiddenAt = 0;
+});
+window.addEventListener('pageshow', e=>{ if(e.persisted) backToTop(); });
+try{ if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
+render();
+// はじめて開いたときに名前を聞く
+if(!db.named && !db.trips.length){
+  openModal(`<h2 style="font-size:16px;margin:0 0 6px">🎣 ようこそ</h2>
+    <div class="muted" style="margin-bottom:10px">あなたの名前（釣果表に出る名前）を入れてください。あとで「設定」から変えられます。</div>
+    <input id="firstName" placeholder="例：たろう">
+    <div class="row" style="margin-top:12px"><button class="btn sub" id="firstSkip">あとで</button><button class="btn" id="firstOk">はじめる</button></div>`);
+  const fin = v=>{ if(v){ db.people=db.people.filter(p=>p!==v); db.me=v; } db.named=true; save(); closeModal(); render(); charaPicker(null, true); };
+  $('#firstOk').onclick=()=>fin($('#firstName').value.trim());
+  $('#firstSkip').onclick=()=>fin('');
+}
+</script>
+
+</body>
+</html>
